@@ -1,0 +1,221 @@
+Code conventions and algorithm outline for time-finder / reconstruction:
+(Comments, suggestions, complaints and questions: guy.nir@weizmann.ac.il. updated May 12 2015)
+
+Compilation:
+-Just run "make". it should work. On linux. 
+
+
+To run on AraSim output files:
+-Needs to have AraSim running on your machine... (need new version, revision 500 is good)
+-Make sure you compiled the shared library in AraSim (use ./library.sh)
+-Make sure the directory of AraSim is in your LD_LIBRARY_PATH
+-Make sure the directory of AraSim is in ARASIM environmental variable. 
+-Make sure you have AraRoot running and ARA_UTIL_INSTALL_DIR is set.
+
+
+User guide:
+-Stand-alone mode: gives gaussian noise (40 mV RMS) ovelayed with a gaussian envelope signal.
+-Choose signal width and amplitude, and how many channels triggered. Check results for different finder-algorithms. 
+-Do reco.help() for more infor... 
+
+
+code conventions:
+-Start classes with the public methods: constructors, destructor, getters, setters, other methods.
+-Finish with private/protected: private methods (internal utility and calculation methods), followed by data members.
+-All members are private (or protected).
+-Members start with an underscore e.g. "_num_chan"
+-Members are lowercase with underscore separators
+-Multidimensional vectors should be suffixed with "_matrix" e.g. "_antenna_pair_matrix" to let us know it is vector<vector>.
+-Use int (or bool) as flags or "bits" to switch off and on, e.g. "_has_time_bit" or "_is_peak_finder_bit". 
+-Try to match the "_has_***_bit" to the actual member "***" e.g. "_has_prev_time_bit" tells us if "_prev_time" exists (or has any useful data)
+-Methods start with lowercase, and separation between words is done with capitals, e.g. "getTime()"
+-Use setters and getters whenever you can, some of them have useful checks and bit changes built into them. 
+-Each class should have an initialize() method to put in all constructors, and a printout() public method. 
+-If some member is not supposed to change, make it const and set it at the constructor list initialization 
+-Make all implementations in the .cc files. This way you don't miss one that only lives in the header. 
+-Try to match the order of methods in the header and implementation files (with private/public exceptions). 
+-Prefer to write more text if it makes things clearer (i.e. don't abbreviate).
+-But also don't over comment (e.g. "int num; // an integer number").
+-Use standard variables, not root variables (double rather than Double_t). 
+-Don't leave commented out code lying around if you don't need it. Check if the new code works and delete the rest if you can. 
+
+coding guidelines:
+-Object Oriented approach- Tell Don't Ask! 
+-Most things are lazy loaded. Try to do the same.
+-If something is not sure to work, add a warning/error. Use __PRETTY_FUNCTION__. 
+
+Class roundup:
+
+Reconstruction class (top level)
+-Top level class. Only one per analysis.
+-Input either EventGenerator, Arasim files or L0Files.
+-Output saves EventData objects (and objects within) or L2 "flat" data members (coming soon).
+-Tell reco in simple (key) words what you want to do.
+-Give it the input events.
+-do reco.loop() and sit back. 
+-more help on keywords using reco.help() (coming soon).
+
+EventData class (InputOutput module)
+-Master container for each event. 
+-Stores EventVertex objects (for Vpol/Hpol/Combined searches). 
+-Stores a single VertexPos object with the final result of the analysis.
+-Stores SimData when used on simulation.
+-Stores L2Data when reading real data.
+-Stores ChannelCollection object. 
+-Reco will tell this object what to apply on its members. 
+
+VertexFinding description:
+
+EventVertex class (VertexFinding module)
+-Inherits from VertexPos. It always knows what the latest and best vertex position is. 
+-Has a vector of VertexFinders. When asked, it runs all of them. 
+-All finders receive the current position as starting point for the search. 
+-All finders are run together and the average of their results is stored back into EventVertex. 
+-Refill the vector of finders to run a second iteration on smaller boundaries. 
+
+VertexPos class (VertexFinding module)
+-Inherits from Pos class. 
+-Keeps a covariance matrix for the error in parameters. 
+-Can give the errors or the parameter range in spherical/cartesian.
+-Asymmetric errors (coming soon). 
+
+Pos class (Geometry module)
+-Colds the x,y,z position of a point in the ice. 
+-Can give coordinates in spherical or cartesian. 
+-Can do basic calculations like average position or distance between points. 
+-More useful than a vector<double>.
+
+VertexFinder class (VertexFinding module)
+-Inherits from VertexPos (always knows its position and errors, as initial or found position). 
+-Base class for all sorts of finders.
+-Has useful methods like myChi to get the ChiSquare result based on channel timing. 
+-Keeps a copy of a ChannelCollection to use as input for any algorithm. 
+-Takes several parameters: 
+  *coordinate system: CARTESIAN, SPHERICAL
+  *lock parameters: UNLOCK, LOCK0, LOCK1, LOCK2, LOCK01, LOCK02, LOCK12
+  *time inputs: TIMES, PAIRS
+  *parameter1,2,3 free parameters, with default 0 (usually that means ignore the parameter). 
+  *OpticalIce pointer: for finders that change that ice model.
+-Each subclass can use these inputs to do whatever it needs. 
+
+ScanVertexFinder class (VertexFinder module)
+-Inherits from VertexFinder class.
+-Does a 3D scan over chi2 for best point. 
+-Most useful with locked parameters, and as secondary iterations. 
+
+MinuitVertexFinder class (VertexFinder module)
+-Inherits from VertexFinder class.
+-Uses Minuit. 
+-Only useful with a good starting guess.
+
+AnalyticMethodVertexFinder class (VertexFinder module)
+-Inherits from VertexFinder class.
+-Takes 4 antennas and solves the equations for the vertex analytically. 
+-Doesn't use variable ice. 
+-Fast and fairly robust. 
+
+MCMCVertexFinder class (VertexFinder module)
+-Inherits from VertexFinder class.
+-Uses Markov chain Monte Carlo to based on chi2 likelihood to get a distribution in x,y,z.
+-Takes the mean as the vertex and the spread as (co)variance of parameters.
+-Slow, but fairly accurate and robust. Doesn't need a starting point. 
+
+RealVertexFinder class (VertexFinder module)
+-Inherits from VertexFinder class.
+-Only used in simulation studies, takes the real vertex position and adds errors. 
+-Errors to the three coordinates are added via parameter1,2,3.
+-Useful for testing finders that need a good starting point. 
+
+TimeFinding description:
+
+ChannelCollection class (TimeFinding module)
+-Basically a vector<Channel*>
+-Has some extra functions, but is fairly lightweight. 
+-Can ask it for subsets of the channels e.g. getVpolChannelCollection(). 
+-Can produce TimingMatrix objects on demand. 
+
+ChannelObject class (TimeFinding module)
+-Inherits from Timing class. 
+-Keeps all the timing data found for the channel in Timing.
+-Keeps the waveform for that channel.
+-Keeps a pointer to StationGeometry to give its position when needed. 
+-Keeps a vector of TimeFinders and a vector<vector> of DeltaFinders.
+-When you applyFinder() (or applyDeltaFinder()) it will run the required finders and put the results in its Timing part. 
+-Calling the same finders (with same parameters) again doesn't recalculate (lazy loading). 
+-Each kind of delta finder (first index of the matrix) has a vector corresponding to the other channels in the collection. 
+-So time delays are stored in the delta finders, and then output using the TimingMatrix. 
+
+TimingMatrix class (TimeFinding module)
+-A glorified vector<vector<PairTiming>>. 
+-Useful as an input output object. 
+
+Timing class (TimeFinding module)
+-Contains the basic information on timing for a channel.
+-Holds hit time (or time delay), weight, and error. 
+-Can be expanded to hold other useful information on the timing. 
+
+PairTiming class (TimeFinding module)
+-Inherits from Timing. 
+-Also keeps pointers to two Channel objects, to back reference their positions if asked by reco algorithms. 
+
+(a description of TimeFinder and DeltaFinder and their daughters to be added)
+
+Geometry description:
+
+StationGeometry class (Geometry module)
+-Class contains information about detector structure, e.g. antenna positions
+-Can be expanded to conatin real detector data such as cable delays and real (i.e. not idealized) antenna positions. 
+
+
+CurvedRay class (Geometry module)
+-Each Channel has one CurvedRay object (if we use reflected rays, then two CurvedRay objects). 
+-Each ray object keeps the last launch angle so that scans/minuit searches can adjust the source positions without having to make large changes in the beam. 
+-CurvedRay has a static pointer to the ice model for index of refraction and such. 
+-Full raytrace solving is not yet implemented. 
+
+OpticalIce class (Geometry module)
+-Class contains information on ice model used, e.g. index of refraction and attenuation. 
+-Is used by CurvedRay class to get beam distance, time and attenuation in ice. 
+
+InputOutput description:
+
+EventGenerator class (InputOutput module)
+-Generates simple events based on gaussian envelope signal overlaid on random gaussian noise. 
+-Randomly chooses position of vertex in ice for timing data. 
+-Set bounds for vertex position and signal width and amplitude. 
+-Get the output ChannelCollection and use them as starting point for reconstruction. 
+
+AraSimFileReader class (InputOutput module)
+-Takes a list of filenames and gets all the information needed into framework friendly format. 
+-Generates a ChannelCollection as input to Reconstruction class. 
+-Generates a SimData object with all the simulation parameters. 
+
+L0FileReader class (InputOutput module)
+-Takes a list of filenames and gets all the information needed into framework friendly format. 
+-Generates a ChannelCollection as input to Reconstruction class. 
+-Generates an L2Data object with all the housekeeping data. 
+
+SimData class (InputOutput module)
+-Container for all the simulation "real" results. 
+-Can be saved to disk for reference. 
+-Is useful for getting time/vertex residuals from "real" data. 
+
+L2Data class (InputOutput module)
+-Container for the housekeeping information. 
+-Useful for saving to disk all the required data from the detector. 
+
+OTHER NOTES:
+
+Working with weights and quality parameters:
+-Finder algorithms should have a quality paramter, which is converted to a scale of 0-1 using "calculateWeight()".
+-"calculateWeight()" uses a linear transformation based on "_scale" and "_thresh".
+-The threshold is subtracted from the quality parameter (e.g. range 5-20 turns to 0-15).
+-Any quality parameter results below threshold is weight=0 and is considered to be "masked off" for reconstruction. 
+-the scale shrinks or expands the range to 0-1 (e.g. for 0-15 the scale should be 15).
+-Anything above or below 0 and 1 is clipped.  
+-To determine the right scale and threshold, set them to 0 and 1 respectively, and run a data/sim sample. 
+-Then tune the calibration constants so that most events have weight 0-1. 
+-Low amplitude, bad waveforms should have zero weight. 
+-High amplitude, clear signals should have weight one. 
+-You can override the "calculateWeight()" method to get non-linear transforms. 
+-Make sure the final reuslts range 0-1. 

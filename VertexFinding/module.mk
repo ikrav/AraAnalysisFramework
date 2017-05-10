@@ -1,0 +1,11 @@
+SOURCES += VertexFinder.cc VertexPos.cc 
+SOURCES += RealVertexFinder.cc
+SOURCES += MinuitVertexFinder.cc
+SOURCES += ScanVertexFinder.cc
+SOURCES += AnalyticVertexFinder.cc 
+SOURCES += MCMCVertexFinder.cc
+SOURCES += IntMapVertexFinder.cc
+SOURCES += AnyWhereVertexFinder.cc
+SOURCES += EarliestVertexFinder.cc
+# SOURCES += MinuitUNLKUVertexFinder.cc
+SOURCES += THX.cc

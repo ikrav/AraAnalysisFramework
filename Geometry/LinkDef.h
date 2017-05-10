@@ -1,0 +1,10 @@
+#pragma link C++ class Pos+;
+#pragma link C++ class std::vector<Pos>+;
+#pragma link C++ class AntPos+;
+#pragma link C++ class std::vector<AntPos>+;
+#pragma link C++ class ValuePos+;
+#pragma link C++ class std::vector<ValuePos>+;
+#pragma link C++ class CurvedRay+;
+#pragma link C++ class std::vector<CurvedRay>+;
+#pragma link C++ class OpticalIce+;
+#pragma link C++ class StationGeometry+;

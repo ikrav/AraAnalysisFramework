@@ -1,0 +1,488 @@
+Change log for Reconstruction tools
+
+============================================================
+
+07/15/14 Guy Nir:
+
+uploaded repository with basic time finding classes:
+
+DeltaTimes, DelayFinder, SimpleDelayFinder, GausDelayFinder, ChannelTime, AntennaPair
+
+also main.cxx and Makefile for testing different methods. 
+
+
+
+=============================================================
+
+8/7/14 Guy Nir:
+
+Added EventGenerator, CurvedRay, OpticalIce and StationGeometry, to standardize the signal generator used in main.cxx.
+Added some standard methods to all classes: initialize(), reset(), clear_all(), printout();
+
+
+=============================================================
+
+8/20/14 Guy Nir:
+
+
+Added Reconstruction class, VertexFinder class and some subclasses:
+
+ScanVertexFinder, SphericalScanVertexFinder : scan all values in eithe cartesian or spherical cooridnates
+MinuitVertexFinder uses minuit to find minimum chi2 (works best with good starting point). 
+
+
+=============================================================
+
+9/6/14 Guy Nir:
+
+Added ranking and original qaulity parameter fields in ChannelTime and AntennaPair. Added ranking in DelayFinder and DeltaTimes (some implementation still needed).
+
+Added a pairToChannels() method in DelayFinder, using linear least squares method based on linear algebra package 'Eigen'
+
+=============================================================
+
+10/10/14 Christian Bora:
+
+Added ASM as a subclass of VertexFinder
+
+Added L0FileReader class to read L0 files
+
+Updated StationGeometry class to work with AraRoot geometry
+
+=============================================================
+
+10/9/14 Guy Nir:
+
+Integrated ASM finder and L0FileReader into the framework. 
+
+Made the reco framework independent of AraRoot and AraSim. 
+
+===========================================================
+
+11/04/14 Christian Bora
+
+Made ASM use all combinations of antennas and take average solution
+
+Updated L0FileReader to generate a stationGeometry object from AraRoot & misc updates
+
+Added an additional constructor to StationGeometry and functions to add independent channel position
+
+===========================================================
+
+12/03/14 Christian Bora:
+
+Added 2 Configuration classes that parses configurations from a text file
+
+Changed methods name to enums, and made misc updates to DeltaTimes & Reconstruction class to use these enums
+
+Uploaded an example of the main loop 
+
+Made a base class for all the Minuit Related methods(MinuitVertexFinder), that will inherit from the VertexFinder class
+
+============================================================
+02/05/14 Christian Bora:
+
+Added Prototype for AraSimFileReader - has a bug, crashes when trying to access AraTree
+
+L0FileReader(removed memory leak) & misc updates
+
+Header files contains doxygen comments
+Added functionality to methods to only reconstruct when we have at least 4 hits
+============================================================
+
+
+02/12/15 Guy Nir:
+
+Extensive changes to time finding methods... 
+Added Pos class (holds x,y,z and gives back R, phi, theta if requested)
+Added Timing class (holds time finding results such as time, weight, error)
+Added Channel class that gives position, timing data and keeps waveforms for one antenna.
+Channel also holds a list of TimeFinder objects (each one uses a different method to find the hit time inside the specific channel). 
+
+TimeFinder replaces the functionality of DelayFinder and lives inside Channel objects, rather than being given a vector of channel id's and a vector of waveforms to scan over. 
+
+Each Channel also holds a vector of vectors of DeltaFinder objects (DeltaFinder replaces DelayFinders that work pairwise like cross-crrelation finder). 
+
+Added ChannelCollection class to hold a vector of Channel objects and has a few functions to loop over all its Channels (like applying finders to all channels) and can give a new ChannelCollection with any subset of the channels inside it (e.g. only Vpol) 
+
+Added TimingMatrix class to help pass around the pairwise timing (which by definition needs a matrix of Nchan by Nchan positions). This is a simple container that easily prints itself and can be handed to reconstruction methods down the line. 
+
+Added ThreshTimeFinder and CrossDeltaFinder as applications time and delay finding classes. 
+
+Began work to integrate the new classes (StationGeometry can output Pos objects, but still internally does not use them exclusively, EventGenerator outputs Channel objects but still doesn't use them internally). 
+
+Also made some initial work to split the code into different modules living in distinct directories. 
+
+==============================================================
+
+03/01/15 Guy Nir:
+
+moved all relevant classes into modules: Geometry, Input, TimeFinding, VertexFinding.
+
+Fixed up VertexFinder and updated MinuitVertexFinder to fit the new scheme. There is no longer need for CartesianMinuitVertexFinder or SphericalMinuitVertexFinder, we simply pass spherical/cartesian using switches. The use of hit times or pair delays is also chosen using switches. 
+
+todo: add parameter lock using switches. 
+
+Added RealVertexFinder utility class that copies the real position into the found position and adds a gaussian error on parameters (enter error using par1).
+
+todo: ScanVertexFinder needs to be refitted to the new scheme, and add functionality to save histograms of the scan. 
+
+todo: check full data path from generator to vertex position.
+
+todo: add functionality to get residulas (into histogram?) from VertexPos. 
+
+todo: VertexPos::calculateCartesian() and VertexPos::calculateSpherical() for error conversion. 
+
+===================================================================
+
+03/01/15 Christian Bora
+
+Updated L0FileReader to work with the new time Finding scheme
+
+===================================================================
+
+03/05/15 Christian Bora
+
+Added CSW class 
+todo: change it to be called from Channel
+
+=================================================================
+
+03/10/15 Christian Bora
+
+Added functionalites for CSW to be called from Channel, and the CSW customized loop over channels in ChannelCollection
+
+Added additional info in TimingMatrix to print channel numbers along their columns
+
+Integrated SimpleTimeFinder to fit in the new scheme
+
+todo: calibrate weights, & errors for Simple and CSW
+
+=================================================================
+
+03/12/15 Guy Nir
+
+added covariance matrix for errors in VertexPos. still need to fix asymmetric errors. 
+
+=================================================================
+
+03/25/15 Guy Nir
+
+Added EventVertex, container for multiple VertexFinder objects. controls what finders are used, and calls:
+VertexPos::meanVertexPos() a new method that takes a vector of VertexPos pointers (or VertexFinder pointers) and calculates the weighted average of the position and the covariance matrices (is this the best thing to do??)
+
+==================================================================
+
+03/27/15 Guy Nir:
+
+Rewritten EventData to contain less stuff and rely on VertexPos and ChannelCollection and EventVertex to contain all the data. 
+
+Added SimData to the EventData class to keep "real" info about the simulated event (energy, flavor etc.).
+
+fixed EventGenerator to use new classes (Pos, Channel).
+
+
+================================================================
+04/1/2015 Christian Bora
+
+added AntPos object to inherit from Pos and add more useful antenna info
+Updated StationGeometry to use a vector of AntPos
+Updated L0/AraSim FileReader
+Modified GausTimeFinder and AnalyticVertexFinder
+
+====================================================================
+
+04/13/2015  Christian Bora
+
+added MapSearchVertexFinder , R, theta, phi scan method
+added prototype of L2Data -- for data warehouse useful information
+
+==================================================================
+
+ 04/16/2015 Christian Bora
+
+Uploading runnable L2Data for Icrr
+
+==================================================================
+
+04/18/2015 Christian Bora
+
+Updated L2Data to hold information for both Icrr and Atri like stations
+Updated L0FileReader to provide necessary info to L2Data - to provide Useful event
+
+
+
+==================================================================
+
+05/08/2015 Guy Nir
+
+Added the MCMCVertexFinder class. Uses Markov chain Monte Carlo method to locate vertex. 
+Also fixed VertexPos to hold errors in a covariance matrix. The calculation for cartesian->spherical is still missing. 
+Asymmetric errors is still missing. 
+
+==================================================================
+
+05/12/2015 Guy Nir
+
+Added file saving to root file (class format).
+Reconstruction controls what is saved/deleted. 
+Made all classes derived from TObject and have ClassDef/ClassImp (may regret that some day...)
+Adjusted the code conventions and class roundup in README
+
+
+==================================================================
+
+05/14/15 Guy Nir
+
+Added IntMapVertexFinder for using Interference maps instead of timefinding in the reconstruction. 
+Takes the graphs saved in Channel->CorrGraph objects (also a new class) and uses them to build histogram maps of the interference values. 
+CorrGraph just stores a TGraph and two pointers to Channel objects, and can call FFTtools::getCorrelationGraph().
+They are lazy filled when calling IntMapVertexFinder or when using CrosDeltaFinder. 
+The maps are stacked and the highest point is chosen as vertex position. 
+For unlock R (if more than one value is scanned) is a logarithmic axis around the current best position. 
+
+
+===================================================================
+
+05/15/15 Christian Bora
+
+OpticalIce - fixing index of refrac. model to return 1 above surface
+
+==================================================================
+
+05/15/15 Christian Bora
+
+CurvedRay - Added Ray Trace algorithm from Andrew...
+AnalyticVertexFinder - set to call statusFailed when no answer is found
+
+
+===================================================================
+
+05/21/15 Christian Bora
+
+Channel - Making sure every delete has an "if" statement to avoid crashes
+Reconstruction - added L0FileReader to Reco -- as now tested for TestBed
+L0/AraSimFileReader - changing getGeometry() to getStationGeometry()
+
+==================================================================
+
+05/26/15 Christian Bora
+
+Updating channelCollection to draw hit times found on waveforms
+Adding first Filters
+Updating Reco to use these filters
+Added a DrawTime class
+
+=================================================================
+
+05/27/15 Christian Bora
+
+Updating Reco, L0 & EventData to work with L2Data
+Included SimData for AraSimFileReader
+Removed the delete lines of channels from EventData - Readers should be responsible for this
+
+=================================================================
+06/03/15 Christian Bora
+
+Added MaxCorrOrderer: class to order channels by their max correlation values
+Added ExpectedDeltaFinder: class to compute expected time difference between channels
+L0FileReader does not, by default, include surface antennas - as this affects the origin,
+	     Now reads VRMS file
+AntPos now holds information about VRMS
+CSW : zero meaned graphs
+ChannelCollection: uses MaxCorrOrderer before applying CSW
+TimeFinder now has StationGeometry object that it points
+ThreshTimeFinder now reads threshold information from AntPos
+Added Earliest/AnyWhereVertexFinder : helper classes to help define starting position
+a new DEBUGGING.txt for notes about bugs that are known
+
+==================================================================
+
+06/11/15 Guy Nir:
+
+added the Reco framework to the ARA svn at UW:
+
+https://svnmsn.icecube.wisc.edu/ara/Software/Reconstruction
+
+
+====================================================================
+
+06/11/15 Christian Bora
+
+Simply checking if I have write rights to this link
+
+==================================================================
+06/12/15 Christian Bora
+
+Moved macCorrOrderer to ChannelCollection
+Added a directory RecoData + thresholds(VRMS) of TestBed, ARA02, ARA03 
+ThreshTimeFinder -- thresholds are now read from the geometry object
+Reconstruction -- updating reader function
+EventData -- updating L2data related function
+L2Data -- updated for more includes (cannot be saved)
+
+================================================================
+07/14/15 Christian Bora
+
+Fixed Memory leaks
+Added classed in the InputOutput module:
+Configuration
+ConfigVertex 
+Parser
+Output
+
+Driver: class that can be used to execute commands
+Added scripts examples : exampleLoop.cxx, testDriver.cxx
+
+===============================================================
+
+07/20/15 Christian Bora
+
+Updating Ice model with values from paper(2014) that agree with Andrew's studies
+
+===============================================================
+
+07/28/15 Christian Bora
+
+Debugging ASM & OpticalIce -- made sure the IoR is correct
+
+=============================================================
+
+08/04/15 Christian Bora	
+
+Adding MinuitUNLKU version with 4 parameters
+
+=============================================================
+
+08/08/15 Guy Nir
+
+Rewritten Reconstruction class to be more lightweight, 
+removed a lot of its functionality that exists in Parser and Output.
+Added the VertexResult class, that holds a single VertexFinder 
+and links to other VertexResult objects, that allows users to run
+analysis on the whole linked list recursively. 
+Started remodelling the VertexFinder class so each object can 
+be created once and reused with each event, inputing the ChannelCollection 
+and the initial position each time in the call to findVertex(). 
+
+=============================================================
+
+08/09/15 Guy Nir
+
+Added the THX histogram class. It can take either 1, 2 or 3 dimensions, 
+and can be filled by different VertexFinders as they scan parameter space, 
+whatevet the locked parameters may be. It can output an histogram in any dimension, 
+so it can be used to safely store parameter scans in different dimensionality 
+that can be plotted later and compared. 
+VertexFinder has been updated to have the new THX, also added copy constructor. 
+The subclasses have not yet been updated... to be wrapped up in a few days. 
+
+============================================================
+
+10/11/15 Christian Bora
+Added EventViewer classes
+Methods validated MinuitUNLKU, Scan, Threshold, MCMC, 
+
+============================================================
+
+10/21/15 Christian Bora
+
+Adding Calibration classes
+
+============================================================
+
+01/06/16 Guy Nir
+
+Fixed THX class. now it holds a list of ValuePos objects, and can 
+draw a histogram of any dimension on demand. 
+ValuePos is a subclass of Pos that also holds a value. 
+This value can be chi-square (default) or any other quality parameter.
+This is used to draw probability distributions. 
+
+============================================================
+
+01/07/16 Guy Nir
+
+Did some cleanup, removed a lot of uneeded classes from the mix:
+EventData, Output, MinuitUNLKUVertexFinder, Configuration, 
+ConfigVertex, Parser, Driver, VertexResult, EventVertex
+
+All were moved to a new folder, GraveYard, where they will be stored
+until someone has time to work on them. 
+
+Removed much of the functionality of Reconstruction class. 
+It now mainly works to set the static pointers of Channel and CurvedRay. 
+When I have time I will try to bring it back to use. 
+
+Cleaned up all places where a "std::" was missing. 
+
+Added a UserGuide tex folder to docs/, still working on it.
+
+ALSO: detached a few modules I didn't know if they were working:
+EventViewer, Filtering, Calibration
+
+============================================================
+
+01/13/16 Guy Nir
+
+Adapted the L0FileReader to a new improved version called FileReader. 
+L0FileReader class has been moved to the graveyard. 
+Class Input is no longer base class for EventGenerator, as it will be removed soon. 
+
+FileReader will be the base class for SimFileReader, coming soon. 
+The new file reader is based on TChain so you can give it file name argument like "*.root" 
+and it will load all root files in the directory. 
+
+============================================================
+
+
+01/18/16 Guy Nir
+
+Added copy constructor and getDeepCopy() to all vertex finders. 
+
+============================================================
+
+01/31/16 Guy Nir
+
+Returned EventData class, in a new and much simplified version. 
+Then changed TreeWriter to hold only an EventData object and write 
+that directly to the root file. 
+
+============================================================
+
+02/02/16 Guy Nir
+
+Fixed some bugs in StationGeometry and VertexPos. 
+The scripts/dataLoop.c is now working ok with IntMapVertexFinder. 
+Still a lot of work, but basically reader->writer chain is up and running. 
+
+Took out the Reco class completely.
+
+============================================================
+
+02/09/16 Guy Nir
+
+added text parsing functionality to VertexFinder (and IntMapVertexFinder)
+This will soon replace the constructors for the finders altogether. 
+fixed some bugs in CrosDeltaFinder. 
+
+
+============================================================
+
+02/10/16 Guy Nir
+
+added the SimFileReader class to replace AraSimFileReader, 
+and fixed FileReader. Now both are functioning and can be used. 
+See scripts simLoop.c and dataLoop.c
+
+The old classes Input, L0FileReader and AraSimFileReader are 
+moved to the Graveyard. 
+
+The SimFileReader will look for waveforms in the files along
+this order:
+
+1) eventTree under Icrr type events
+2) eventTree under Atri type events
+3) AraTree2 for report class
+
+============================================================

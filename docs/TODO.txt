@@ -1,0 +1,49 @@
+short list of things to do...
+
+Input / Geometry:
+-Rewrite EventGenerator to use new classes and dump dependency on old classes. DONE
+-Rewrite StationGeometry to use Pos and maybe make it more flexible. Update L0FileReader to new geometry class implementation. DONE
+-Fix AraSimFileReader. CHRISTIAN - TESTING
+-CurvedRay to use raytracing to find curved path and time data. ???
+-Configuration class to use new classes structure and dependencies. CHRISTIAN
+
+TimeFinding:
+-CSWTimeFinder, make sure everything works (who is responsible for deleting the CSW graph?). CHRISTIAN
+-Add channel/pair level filters (already built into time finders?) and let ChannelCollection complain when not enough channels have w>0. DISCUSSION
+-Add check to see if Channel has waveforms to use... GUY
+-Change TimeFinder so it holds a pointer to its Channel. GUY
+-How to add calibration constants to an analysis.... DISCUSSION
+
+VertexFinding:
+-VertexPos error scheme: add assymetric errors. GUY
+-VertexPos error scheme: transition from Cartesian to Spherical isn't fully functional. TESTING
+-AnalyticMethodVertexFinder: move to new scheme (constructor+inheritance from VertexPos). CHRISTIAN
+-EventData: write tree as L2 doubles/ints directly (non-class tree format). ???
+-EventData: add fields for all the housekeeping data from sim/L0 files. CHRISTIAN
+-SimData: fill with all useful AraSim results (like Report class). GUY/CHRISTIAN
+-Add checks that enough channels have w>0 and what to do if not. DISCUSSION
+-general vertex finding: wrap around for angles... GUY
+-MapSearchVertexFinder: R, theta phi search with closing bounds ... CHRISTIAN - TESTING
+-VertexPos: Add more comments around functions... GUY
+-VertexFinder: get some TH3D output for non-par-lock vertex finders somehow... GUY
+
+PhaseMapping (new module)
+-got integrated into VertexFinding... 
+
+Filters (new module)
+-consider which cuts can be applied after reconstruction is done. DISCUSSION
+-combine with cuts on vertex confidence maybe? DISCUSSION
+-
+
+Testing ground:
+-plot some residuals for time finding results based on generator. ???
+-plot some residuals for vertex finding results based on generator. ???
+-integrate run time comparisons for each finder (time/vertex) inside classes, or make a loop that tests this. DISCUSSION
+
+
+Documentation:
+-Some Latex document for casual user and for programmer. GUY
+-Doxygen for web based documentation. CHRISTIAN
+-general testing chart with results of each algorith: run time, vertex pos errors, botched reconstructions etc... DISCUSSION
+-present such result for current methods in a nice table. ???
+-add help() methods to some of the classes. GUY

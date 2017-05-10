@@ -1,0 +1,70 @@
+####
+	List of known issues/bugs that have not been fixed yet OR just got fixed
+	We can also record things that are not trivial for a casual user
+	 (will helps user compile notes for documentation)
+####
+
+	1. AraRoot adds channels that are 0,0,0 - by default only deep antennas are included, to add surface antenna use L0FileReader constructor  -- DONE
+
+	2. Fix thresholds - thresholds now stored in AntPos and read from there -- DONE
+
+	3. CSW - order channels by max correlation -- DONE
+
+	4. ExpectedDeltaFinder -- DONE
+
+	5. Does weight get computed correctly
+	   - SIMPLE -- GOOD - fixed
+	     - GAUS -- time found sometimes weight is zero -- put a weight=0.9
+	       - CSW -- a weight of 0.1 is applied by default
+	       	 - THRESH -- good
+		 
+		  ( We will have to come up with a conventional method to define weight for each one of these methods)
+       6. problems with enums
+       	      - since we are using enums, and they are simply numbers
+	       	     when I do applyTimeFinder(DeltaFinder::CROS)
+		     	- it applies the GAUS method
+			     => we should handle these types of behaviors
+
+       7. How about weight of pairwise DELTAFINDERS
+         	- If we do analysis from the Reconstruction class, we have no problem since a default TimeFinder will be applied before a deltaFinder
+
+       8. How are the initial position defined
+	  - Are the bounds in degrees or radians   -- RADIANS
+	  - if in radians they are too large up to 9 radians - WILL BE FIXED
+	  - How do I set initial position from configuration?    -- iMPLEMENTED HELPER CLASSES FOR THIS
+	  - Maybe use position of the earliest channel by default  -- can be done from the parser
+          - Chi-square
+	  	- does	t_found - t_expected - t_best_channel  -- GOOD
+		
+      9. How does each vertexFinder know which timeFinder to use  
+      
+		- The last one applied to it
+
+      10. revise ASM -- DONE
+												
+      11. Check if a method that is passed in configuration gets executed  -- GOOD
+	
+      12. L2Data problems, structs not saved in the tree because of ROOT dictionnary issues
+
+      13. Other issues
+	     - setting ice variability bit from parser
+	     
+14. Raytracing using curved rays needs to be tested vs. AraSim for example
+
+15. add a check in ChannelCollection to verify a minimum amount of channels (3 or 4?) have weight>0 before doing any vertexfinding
+
+16. VertexPos: no treatment for asymmetric errors yet
+
+17. Angle wrap around: this is a tricky one, especially when error bounds are involved... 
+
+18. integrate tools for checking runtime of differnt finders right into framework. 
+
+19. ASM: (NOTE)
+    works in Cartesian. no matter which coordinate system is passed to ASM, asm will always be executed in cartesian coordinates. e.g. If the spherical coordinates system is passed to ASM it will be executed using cartesian coordinates
+
+20. Undefined solution:
+    Need to decide which value to save when the answer is not found.
+
+21. Probobably initialize time with an absurd value of 999, and probably weight with a negative value -- to differentiate which channels actually had their waveforms scanned
+
+22. 

@@ -1,0 +1,10 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <math.h>
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <time.h>
+#include <iomanip>
