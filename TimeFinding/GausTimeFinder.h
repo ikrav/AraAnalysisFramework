@@ -39,12 +39,12 @@ public:
 //   virtual void calculateWeight();
   
   virtual TimeFinder *getDeepCopy();
-  GausTimeFinder& operator=(const GausTimeFinder &other);
+  //GausTimeFinder& operator=(const GausTimeFinder &other);
   
   static TGraph *gausmooth(TGraph *gr, int numBins=12, double sigma=3);
   void getPeak(int N, double *X, double *Y, double &time, double &clarity, int numBins=12);
   void getPeak(TGraph *gr, double &time, double &clarity, int numBins=12);
-  void getPeak(TGraph *gr, double *time_array, double *clarity_array, int iterations, int numBins=12);
+  //void getPeak(TGraph *gr, double *time_array, double *clarity_array, int iterations, int numBins=12);
 
 protected:
   

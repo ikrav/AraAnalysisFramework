@@ -10,7 +10,7 @@ class RealVertexFinder : public VertexFinder {
 
 public:
   
-  RealVertexFinder();
+  //RealVertexFinder();
   RealVertexFinder(ChannelCollection channels, VertexPos *initial_position=0, int coordinate_system=0, int time_input=0, int lock_parameters=0, OpticalIce *ice_ptr=0, double par1=0, double par2=0, double par3=0);
   RealVertexFinder(const std::string commands);
   RealVertexFinder(ChannelCollection channels, VertexPos *initial_position, const std::string commands);

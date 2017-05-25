@@ -17,7 +17,7 @@ public:
   virtual ~RealTimeFinder();
   
   virtual TimeFinder *getDeepCopy();
-  RealTimeFinder& operator=(const RealTimeFinder &other);
+  //RealTimeFinder& operator=(const RealTimeFinder &other);
   
 protected:
   

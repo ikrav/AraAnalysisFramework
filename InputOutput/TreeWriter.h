@@ -47,7 +47,7 @@ public:
   int getSaveFindersBit() const;
   int getSaveHousekeepingBit() const;
   
-  int getEventNumber() const;
+  //int getEventNumber() const;
   
   VertexFinder *getFinder(int index=0) const;
   std::vector<VertexFinder*> getFindersVector() const;
@@ -57,8 +57,8 @@ public:
   EventData *getEventData() const;
   
   // setters
-  void setFileName(std::string name);
-  void setBranchName(std::string name);
+  //void setFileName(std::string name);
+  //void setBranchName(std::string name);
     
   void setSaveChannelsBit(int bit);
   void setSaveFindersBit(int bit);
@@ -69,9 +69,9 @@ public:
 
   void setChannels(ChannelCollection channels);
   void addFinder(VertexFinder *finder);
-  void setFindersVector(std::vector<VertexFinder*> finders);
-  void setHousekeeping(L2Data *data);
-  void setSimData(SimData *data);
+  //void setFindersVector(std::vector<VertexFinder*> finders);
+  //void setHousekeeping(L2Data *data);
+  //void setSimData(SimData *data);
   
   void fill(); // fills the tree and calls clear()
   void write();  // writes event to file
