@@ -252,11 +252,11 @@ bool FileReader::loadNextEvent(){
     
   if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
 
-  if(_current_event_num >= _total_events) { printf("Fail 1: %i \t %i\n",_current_event_num,_total_events); return false; }
+  if(_current_event_num >= _total_events) return false;
   else{
     
     if(loadEvent(_current_event_num)) _current_event_num++;
-    else {printf("Fail 2\n"); return false;} // if we fail to load event! 
+    else return false; // if we fail to load event! 
     
   }
   
