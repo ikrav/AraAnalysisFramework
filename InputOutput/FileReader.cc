@@ -12,7 +12,7 @@ FileReader::FileReader(std::string filenames, std::string vrmsFile, int useSurfa
 }
 
 FileReader::~FileReader(){
-
+  
   if(_geom) delete _geom; _geom =0;
   if(_station_info) delete _station_info; _station_info=0;
   
@@ -48,6 +48,9 @@ void FileReader::initialize(){
   _use_surface_ants=0;
         
   _branches_set=0;
+
+  _station_info=0;
+  _geom=0;
   
 }
 
@@ -249,11 +252,11 @@ bool FileReader::loadNextEvent(){
     
   if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
 
-  if(_current_event_num >= _total_events) return false;
+  if(_current_event_num >= _total_events) { printf("Fail 1: %i \t %i\n",_current_event_num,_total_events); return false; }
   else{
     
     if(loadEvent(_current_event_num)) _current_event_num++;
-    else return false; // if we fail to load event! 
+    else {printf("Fail 2\n"); return false;} // if we fail to load event! 
     
   }
   

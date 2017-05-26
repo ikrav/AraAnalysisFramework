@@ -35,8 +35,8 @@ public:
  
   virtual void initialize();
   virtual void calculateTime();
-//   virtual void calculateError();
-//   virtual void calculateWeight();
+//   virtual void calculateError(); //This method was introduced but has never been implemented
+//   virtual void calculateWeight(); //This method was introduced but has never been implemented
   
   virtual TimeFinder *getDeepCopy();
   //GausTimeFinder& operator=(const GausTimeFinder &other);
@@ -44,7 +44,7 @@ public:
   static TGraph *gausmooth(TGraph *gr, int numBins=12, double sigma=3);
   void getPeak(int N, double *X, double *Y, double &time, double &clarity, int numBins=12);
   void getPeak(TGraph *gr, double &time, double &clarity, int numBins=12);
-  //void getPeak(TGraph *gr, double *time_array, double *clarity_array, int iterations, int numBins=12);
+  //void getPeak(TGraph *gr, double *time_array, double *clarity_array, int iterations, int numBins=12); //This method was introduced but has never been implemented
 
 protected:
   

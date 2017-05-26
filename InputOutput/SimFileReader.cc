@@ -15,12 +15,11 @@ SimFileReader::~SimFileReader(){
 void SimFileReader::initialize(){
   
   if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
-  
   _detector=0;
   _settings=0;
   _report=0;
   _event=0;
-    
+  
 }
 
 void SimFileReader::printout(){
@@ -138,6 +137,7 @@ void SimFileReader::setupGeometry(){
   }
   
   _station_number=0; // is there going to be a field in AraSim to get this from?
+  int stationID = _detector->stations[_station_number].StationID;
  
   double origin[3];  //to compute reference frame
   
@@ -157,7 +157,7 @@ void SimFileReader::setupGeometry(){
   
   for(int ch=0; ch<_num_chans; ch++){
     
-    _detector->GetSSAfromChannel(0, ch+1, &ant, &string, _settings);
+    _detector->GetSSAfromChannel(stationID, ch, &ant, &string, _settings);
     
     //get the position
     
@@ -166,7 +166,7 @@ void SimFileReader::setupGeometry(){
     locationXYZ[0] = _detector->stations[_station_number].strings[string].antennas[ant].GetX() - station_pos[0];
     locationXYZ[1] = _detector->stations[_station_number].strings[string].antennas[ant].GetY() - station_pos[1];
     locationXYZ[2] = _detector->stations[_station_number].strings[string].antennas[ant].GetZ() - station_pos[2];
-        
+      
     origin[0] += locationXYZ[0];
     origin[1] += locationXYZ[1];
     origin[2] += locationXYZ[2];
