@@ -12,7 +12,7 @@ FileReader::FileReader(std::string filenames, std::string vrmsFile, int useSurfa
 }
 
 FileReader::~FileReader(){
-
+  
   if(_geom) delete _geom; _geom =0;
   if(_station_info) delete _station_info; _station_info=0;
   
@@ -48,6 +48,9 @@ void FileReader::initialize(){
   _use_surface_ants=0;
         
   _branches_set=0;
+
+  _station_info=0;
+  _geom=0;
   
 }
 

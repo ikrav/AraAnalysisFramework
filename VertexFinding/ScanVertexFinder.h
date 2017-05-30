@@ -49,7 +49,7 @@ public:
   void setNumSteps1(int num);
   void setNumSteps2(int num);
   void setNumSteps3(int num);
-  void setNumSteps(int num1, int num2, int num3);
+  //void setNumSteps(int num1, int num2, int num3); //This method was introduced but has never been implemented
   
   static const int _iter_2_theta_bins;
   static const int _iter_2_phi_bins;

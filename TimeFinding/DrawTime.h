@@ -22,9 +22,9 @@ class DrawTime {
   
   TMultiGraph *getGraph() const;
   
-  int getN() const;
-  double *getX() const;
-  double getTime() const;
+  //int getN() const; //This method was introduced but has never been implemented
+  //double *getX() const; //This method was introduced but has never been implemented
+  //double getTime() const; //This method was introduced but has never been implemented
   Channel *getChannel() const;
 
   void setTime(double t);
