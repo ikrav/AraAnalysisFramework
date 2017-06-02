@@ -105,7 +105,7 @@ bool FileReader::setBranches(){
   if(_station_number==0){
     
     if(_chain->SetBranchAddress("event", &_raw_icrr_ev)!=TTree::kMatch){
-    
+      
       std::cerr<<__PRETTY_FUNCTION__<<" ERROR: cannot locate branch 'event' in chain"<<std::endl;
       return false;
     
@@ -126,10 +126,7 @@ bool FileReader::setBranches(){
       return false;
     
     }
-      
-    _is_icrr = 1;
-    _is_atri = 0;
-    
+          
   }
  
   setDefaultInterpolationFactor();
@@ -215,9 +212,9 @@ void FileReader::clearEvent(){
   
   clearChannels();
     
-//   if(_raw_ev){ delete _raw_ev; _raw_ev=0; }
-//   if(_raw_icrr_ev){ delete _raw_icrr_ev; _raw_icrr_ev=0; }
-//   if(_raw_atri_ev){ delete _raw_atri_ev; _raw_atri_ev=0; }
+//  if(_raw_ev){ delete _raw_ev; _raw_ev=0; }
+//  if(_raw_icrr_ev){ delete _raw_icrr_ev; _raw_icrr_ev=0; }
+//  if(_raw_atri_ev){ delete _raw_atri_ev; _raw_atri_ev=0; }
   
   if(_real_icrr_ev){ delete _real_icrr_ev; _real_icrr_ev=0; }
   if(_real_atri_ev){ delete _real_atri_ev; _real_atri_ev=0; }
@@ -284,7 +281,7 @@ bool FileReader::loadEvent(int eventNumber){
   int isPulser=0; // we need to find something smart to do with this result... 
   
   if(_is_icrr){
-    
+
     _real_icrr_ev = new UsefulIcrrStationEvent(_raw_icrr_ev, AraCalType::kLatestCalib);
     
     isPulser = _real_icrr_ev->isCalPulserEvent();
@@ -292,7 +289,7 @@ bool FileReader::loadEvent(int eventNumber){
     
   }
   else if(_is_atri){
-    
+
     _real_atri_ev = new UsefulAtriStationEvent(_raw_atri_ev, AraCalType::kLatestCalib);
     // how do we know it is calpulser?!
     
