@@ -9,7 +9,7 @@ CFLAGS:= -Wl,--no-as-needed -fPIC $(ROOT_CONFIG) -DWITH_SQLITE3=ON
 INCLUDES:= -I. -Iincludes -I$(LIBROOTFFTWWRAPPER_DIR) -I$(ARA_UTIL_INSTALL_DIR)/include -I$(SQLITE)/include # include some of the generic headers needed
 # -I/home/cbora/Software/Install/Eigen/eigen-eigen-1306d75b4a21/Eigen  -I/usr/include
 
-MODULES := Geometry InputOutput TimeFinding VertexFinding # Filtering EventViewer Calibration
+MODULES := Geometry InputOutput TimeFinding VertexFinding Filtering # Filtering EventViewer Calibration
 
 INCLUDES += $(patsubst %,-I%, $(MODULES)) # include the different module directories in the include directive
 VPATH+=$(subst :, , $(MODULES))
