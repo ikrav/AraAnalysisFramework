@@ -9,7 +9,7 @@
 #include "Channel.h"
 #include "ChannelCollection.h"
 #include "FFTtools.h"
-//#include "L2Data.h"
+#include "L2Data.h"
 
 /**
    FileReader class \fn
@@ -54,6 +54,7 @@ public:
   int getAraCurrentEventNumber();
   int getRunNumber();
   int getStationId();
+  L2Data *getL2Data();
   
   bool isIcrrEvent();
   bool isAtriEvent();
@@ -105,7 +106,7 @@ protected:
   AraStationInfo *_station_info;
   StationGeometry *_geom;
   ChannelCollection _channels;
-  //L2Data *_l2_data;
+  L2Data *_l2_data;
     
   ClassDef(FileReader, 1);
   

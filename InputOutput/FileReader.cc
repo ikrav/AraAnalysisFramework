@@ -32,9 +32,7 @@ void FileReader::initialize(){
   _raw_atri_ev=0;
   _real_atri_ev=0;  
   _real_icrr_ev=0;
-  
-  clearEvent();
-  
+    
   // initialize other parameters
   _num_chans=0;
   
@@ -51,7 +49,10 @@ void FileReader::initialize(){
 
   _station_info=0;
   _geom=0;
-  
+  _l2_data=0;
+
+  clearEvent();
+
 }
 
 bool FileReader::setChains(){
@@ -218,6 +219,7 @@ void FileReader::clearEvent(){
   
   if(_real_icrr_ev){ delete _real_icrr_ev; _real_icrr_ev=0; }
   if(_real_atri_ev){ delete _real_atri_ev; _real_atri_ev=0; }
+  if(_l2_data){ delete _l2_data; _l2_data=0; }
   
 }
 
@@ -285,7 +287,9 @@ bool FileReader::loadEvent(int eventNumber){
     _real_icrr_ev = new UsefulIcrrStationEvent(_raw_icrr_ev, AraCalType::kLatestCalib);
     
     isPulser = _real_icrr_ev->isCalPulserEvent();
-    
+
+    _l2_data = new L2Data(_real_icrr_ev);
+    //_l2_data->fillIcrr(_real_icrr_ev);
     
   }
   else if(_is_atri){
@@ -293,10 +297,13 @@ bool FileReader::loadEvent(int eventNumber){
     _real_atri_ev = new UsefulAtriStationEvent(_raw_atri_ev, AraCalType::kLatestCalib);
     // how do we know it is calpulser?!
     
+    _l2_data = new L2Data(_real_atri_ev);
+    //_l2_data->fillAtri(_real_atri_ev);
+
   }
   
   loadChannels();
-   
+  
   return true;
 
 }
@@ -425,6 +432,12 @@ int FileReader::getStationId(){
 
   return _station_number;
   
+}
+
+L2Data *FileReader::getL2Data() {
+
+  return _l2_data;
+
 }
 
 bool FileReader::isAtriEvent(){
