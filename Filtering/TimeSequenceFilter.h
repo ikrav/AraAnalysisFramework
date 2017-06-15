@@ -7,13 +7,14 @@
 class TimeSequenceFilter : public Filter {
 
  public:
-
+  
   TimeSequenceFilter();
   TimeSequenceFilter(EventData *event, int pol=2);
   virtual ~TimeSequenceFilter();
 
   inline double getQualityParameter() {return _quality;}
   inline void setNeededQualityParameter(double qual) {_minQuality = qual;}
+  inline void setThresholdFactor(double factor) {_thFactor=factor;}
   
   void initialize();
   virtual bool pass();
