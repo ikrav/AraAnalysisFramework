@@ -38,7 +38,7 @@ void FileReader::initialize(){
   
   _total_events=0;
   _current_event_num=0;
-  _interpolation_factor=1;
+  _interpolation_factor=1.0;
   _station_number=-1;
   
   _is_atri=0;
@@ -253,7 +253,6 @@ bool FileReader::loadNextEvent(){
 
   if(_current_event_num >= _total_events) return false;
   else{
-    
     if(loadEvent(_current_event_num)) _current_event_num++;
     else return false; // if we fail to load event! 
     
