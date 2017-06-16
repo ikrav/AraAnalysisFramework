@@ -8,8 +8,7 @@ class TimeSequenceFilter : public Filter {
 
  public:
   
-  TimeSequenceFilter();
-  TimeSequenceFilter(EventData *event, int pol=2);
+  TimeSequenceFilter(EventData *event);
   virtual ~TimeSequenceFilter();
 
   inline double getQualityParameter() {return _quality;}
