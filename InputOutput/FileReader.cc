@@ -285,8 +285,8 @@ bool FileReader::loadEvent(int eventNumber){
 
     _real_icrr_ev = new UsefulIcrrStationEvent(_raw_icrr_ev, AraCalType::kLatestCalib);
     
-    isPulser = _real_icrr_ev->isCalPulserEvent();
-
+    _isCalPulser = _real_icrr_ev->isCalPulserEvent();
+    
     _l2_data = new L2Data(_real_icrr_ev);
     //_l2_data->fillIcrr(_real_icrr_ev);
     
@@ -294,8 +294,11 @@ bool FileReader::loadEvent(int eventNumber){
   else if(_is_atri){
 
     _real_atri_ev = new UsefulAtriStationEvent(_raw_atri_ev, AraCalType::kLatestCalib);
-    // how do we know it is calpulser?!
     
+    _isCalPulser = _raw_atri_ev->isCalpulserEvent();
+    _isSoftwareTrig = _raw_atri_ev->isSoftwareTrigger();
+    _isRFEvent = _raw_atri_ev->isRFTrigger();
+
     _l2_data = new L2Data(_real_atri_ev);
     //_l2_data->fillAtri(_real_atri_ev);
 
@@ -368,6 +371,44 @@ bool FileReader::loadVRMS(){
   
   return true;
   
+}
+
+void FileReader::scanSoftwareTriggersForVRMS() {
+
+  _VRMS.clear();
+  
+  int cnt = 0;
+  std::vector<double> rms;
+  for(int ch = 0; ch < _num_chans; ch++) rms.push_back(0.0);
+
+  for(int ievt=0; ievt<_total_events; ievt++) {
+
+    if(loadEvent(ievt)) {
+      if(_is_icrr && !_isCalPulser) {
+	for(int ch = 0; ch < _num_chans; ch++){
+	  TGraph *gra = _real_icrr_ev->getGraphFromRFChan(ch);
+	  rms[ch] += gra->GetRMS(2);
+	  delete gra;
+	}    
+	cnt++;
+      }
+      if(_is_atri && _isSoftwareTrig) {
+	for(int ch = 0; ch < _num_chans; ch++){
+	  TGraph *gra = _real_atri_ev->getGraphFromRFChan(ch);
+	  rms[ch] += gra->GetRMS(2);
+	  delete gra;
+	}
+	cnt++;
+      }
+    }
+    
+  }
+  
+  for(int ch = 0; ch < _num_chans; ch++){
+    rms[ch] /= cnt;
+    _VRMS.push_back(rms[ch]);
+  }
+
 }
 
 // getters

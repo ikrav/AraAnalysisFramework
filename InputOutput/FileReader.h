@@ -43,6 +43,7 @@ public:
   virtual bool loadEvent(int event_number);
   void loadChannels();
   bool loadVRMS();
+  void scanSoftwareTriggersForVRMS();
     
   // getters
   std::string getFileNames() const;
@@ -87,6 +88,10 @@ protected:
   int _is_atri;
   int _is_icrr;
   int _use_surface_ants;
+
+  bool _isCalPulser;
+  bool _isRFEvent;
+  bool _isSoftwareTrig;
 
   int _branches_set;
   
