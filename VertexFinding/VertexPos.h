@@ -222,6 +222,14 @@ protected:
   double _error_R;
   double _error_theta;
   double _error_phi;
+
+  double _upper_bound_theta;
+  double _upper_bound_R;
+  double _upper_bound_phi;
+
+  double _lower_bound_theta;
+  double _lower_bound_R;
+  double _lower_bound_phi;
   
 //   double _lower_error_x;
 //   double _lower_error_y;

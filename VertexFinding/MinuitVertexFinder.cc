@@ -127,7 +127,7 @@ std::string MinuitVertexFinder::getFinderName() const {
 
 void MinuitVertexFinder::findVertex(){ 
    
-  std::cout<<__PRETTY_FUNCTION__<<std::endl;
+  if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
   
   reset();
   

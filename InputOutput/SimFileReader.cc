@@ -13,13 +13,15 @@ SimFileReader::~SimFileReader(){
 }
 
 void SimFileReader::initialize(){
-  
+
   if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
   _detector=0;
   _settings=0;
   _report=0;
   _event=0;
-  
+  _station_number=0;
+  _evtTreeToAraTree2Translation.clear();
+
 }
 
 void SimFileReader::printout(){
@@ -30,6 +32,7 @@ void SimFileReader::printout(){
 
 bool SimFileReader::setChains(){
           
+  _a2cnt = -1;
   if(debug_bit) std::cout<<__PRETTY_FUNCTION__<<std::endl;
   
   FileReader::setChains();
@@ -98,8 +101,12 @@ bool SimFileReader::setBranches(){
   else if(_sim_chain2->GetListOfBranches()->FindObject("report")){
     
 //     we will set the branch address for report and event below
-//     _sim_chain2->SetBranchAddress("report", &_report); 
+    _sim_chain2->SetBranchAddress("report", &_report); 
     if(debug_bit) std::cout<<"setting up the branch based on 'AraTree2' and 'Reprt'..."<<std::endl;
+    for(int i=0; i<_sim_chain2->GetEntries(); i++) {
+      _sim_chain2->GetEntry(i);
+      if(_report->stations[_station_number].Global_Pass>0) _evtTreeToAraTree2Translation.push_back(i);
+    }
     
   }
   else{
@@ -111,6 +118,10 @@ bool SimFileReader::setBranches(){
   
   if(_sim_chain2->GetListOfBranches()->FindObject("report")){
     _sim_chain2->SetBranchAddress("report", &_report);
+    for(int i=0; i<_sim_chain2->GetEntries(); i++) {
+      _sim_chain2->GetEntry(i);
+      if(_report->stations[_station_number].Global_Pass>0) _evtTreeToAraTree2Translation.push_back(i);
+    }
   }
   
   if(_sim_chain2->GetListOfBranches()->FindObject("event")){
@@ -137,7 +148,10 @@ void SimFileReader::setupGeometry(){
   }
   
   _station_number=0; // is there going to be a field in AraSim to get this from?
-  int stationID = _detector->stations[_station_number].StationID;
+  //int stationID = _detector->stations[_station_number].StationID;
+  _station_ID = _settings->DETECTOR_STATION;
+  _exponent = _settings->EXPONENT;
+  _cylinder_radius = _settings->POSNU_RADIUS;
  
   double origin[3];  //to compute reference frame
   
@@ -152,13 +166,11 @@ void SimFileReader::setupGeometry(){
   _num_chans=_detector->stations[_station_number].number_of_antennas;
   
   vector<AntPos> positions;
-  
-//   printf("station pos: %f %f %f\n", station_pos[0], station_pos[1], station_pos[2]);
-  
+    
   for(int ch=0; ch<_num_chans; ch++){
     
-    _detector->GetSSAfromChannel(stationID, ch, &ant, &string, _settings);
-    
+    _detector->GetSSAfromChannel(_station_ID, ch, &ant, &string, _settings);
+
     //get the position
     
     double locationXYZ[3];
@@ -204,8 +216,12 @@ bool SimFileReader::loadEvent(int eventNumber){
   clearEvent();
     
   _chain->GetEntry(eventNumber);
-  _sim_chain2->GetEntry(eventNumber);
-  
+  int passcnt = -1;
+  int aratree2evt = 0;
+  bool enditall = false;
+
+  _sim_chain2->GetEntry(_evtTreeToAraTree2Translation[eventNumber]);
+
   if(!isFromReport()) loadChannels(); // call the base class reader function to getGraphFromRFChan
   else loadChannelsReport(); // use the waveforms from Report class...
 
@@ -222,12 +238,15 @@ bool SimFileReader::loadEvent(int eventNumber){
     posnu[1]=_event->Nu_Interaction[0].posnu.GetY();
     posnu[2]=_event->Nu_Interaction[0].posnu.GetZ();
   
+    _weight = _event->Nu_Interaction[0].weight;
+    _flavor = _event->nuflavorint;
+    _nu_nubar = _event->nu_nubar;
+    _current = _event->Nu_Interaction[0].currentint;
+    _cross_sec = _event->Nu_Interaction[0].sigma;
+
     for(int a=0;a<3;a++) posnu[a]=posnu[a]-station_pos[a];
-    
     _real_pos.setCartesian(posnu[0], posnu[1], posnu[2]);
-  
-//     _real_pos.printout();
-    
+      
   }
 
   return true;
@@ -276,10 +295,39 @@ int SimFileReader::isFromReport() const {
   
 }
 
+int SimFileReader::getNumberEventsAraTree2() {
+
+  return _sim_chain2->GetEntries();
+
+}
+
 Pos SimFileReader::getRealPosition(){
     
   return _real_pos;
     
+}
+
+double SimFileReader::getReceivingAngle(int channel, int solution) {
+  if(!_report) {std::cout<<"Report points to nothing, can't get receiving angle"<<std::endl; return 999;}
+  if(!_detector) {std::cout<<"Detector points to nothing, can't get receiving angle"<<std::endl; return 999;}
+  if(!_settings) {std::cout<<"Settings points to nothing, can't get receiving angle"<<std::endl; return 999;}
+  int ant, string;
+  _detector->GetSSAfromChannel(_station_ID, channel, &ant, &string, _settings);
+  int recsize = _report->stations[_station_number].strings[string].antennas[ant].rec_ang.size();
+  if(solution>=recsize) {
+    std::cout << "Can't get receiving angle for the "<<solution<<" solution, receiving angle vector has "<<recsize<<" solutions"<<std::endl;
+    return 999;
+  }
+  return _report->stations[_station_number].strings[string].antennas[ant].rec_ang[solution];
+}
+
+int SimFileReader::getReceivingAngleVectorSize(int channel) {
+  if(!_report) {std::cout<<"Report points to nothing, can't get receiving angle vector size"<<std::endl; return 999;}
+  if(!_detector) {std::cout<<"Detector points to nothing, can't get receiving angle vector size"<<std::endl; return 999;}
+  if(!_settings) {std::cout<<"Settings points to nothing, can't get receiving angle vector size"<<std::endl; return 999;}
+  int ant, string;
+  _detector->GetSSAfromChannel(_station_ID, channel, &ant, &string, _settings);
+  return _report->stations[_station_number].strings[string].antennas[ant].rec_ang.size();
 }
 
 Pos SimFileReader::getSourcePosition(){

@@ -1,10 +1,12 @@
 
 #include "TimeSequenceFilter.h"
 
-TimeSequenceFilter::TimeSequenceFilter(EventData *event) : Filter(event) {
-
+TimeSequenceFilter::TimeSequenceFilter() : Filter() {
   initialize();
+}
 
+TimeSequenceFilter::TimeSequenceFilter(EventData *event) : Filter(event) {
+  initialize();
 }
 
 TimeSequenceFilter::~TimeSequenceFilter() {

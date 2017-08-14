@@ -44,6 +44,7 @@ public:
   void loadChannels();
   bool loadVRMS();
   void scanSoftwareTriggersForVRMS();
+  void setChannelVRMS(int channel, double rms);
     
   // getters
   std::string getFileNames() const;
@@ -55,11 +56,14 @@ public:
   int getAraCurrentEventNumber();
   int getRunNumber();
   int getStationId();
+  inline double getUnixtime() { return _unixTime; }
   L2Data *getL2Data();
   
   bool isIcrrEvent();
   bool isAtriEvent();
   virtual bool isCalPulser();
+  virtual bool isSoftwareTrigger();
+  virtual bool isRFTrigger();
   virtual bool isSimulation() const;
   
   double getInterpolationFactor() const;
@@ -92,6 +96,8 @@ protected:
   bool _isCalPulser;
   bool _isRFEvent;
   bool _isSoftwareTrig;
+
+  double _unixTime;
 
   int _branches_set;
   

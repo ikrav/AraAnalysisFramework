@@ -448,7 +448,6 @@ void Channel::useDataFromFinder(int index){ // copy the timing data from the fin
 
   setFinderName(_finders[index]->getFinderName());
   setFinderType(_finders[index]->getFinderType());
-  
   setTimingData(_finders[index]->getTime(), _finders[index]->getWeight(), _finders[index]->getError());
   
   if(_finders[index]->hasRealTime()) setRealTime(_finders[index]->getRealTime());

@@ -160,14 +160,12 @@ std::vector<double> StationGeometry::getAntPos(int ch){
 AntPos StationGeometry::getPosition(int channelID) const {
 
   if(channelID<0 || channelID>=_antenna_positions.size()){
-   
     std::cerr<<__PRETTY_FUNCTION__<<" ERROR: cannot access ID "<<channelID<<" number of channels is "<<_antenna_positions.size()<<std::endl;
-    
     return AntPos();
-    
   }
   
   return _antenna_positions[channelID];
+
 }
 
 AntPos StationGeometry::getPulserPos(int pulserID) const {

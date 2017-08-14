@@ -7,7 +7,8 @@
 class TimeSequenceFilter : public Filter {
 
  public:
-  
+
+  TimeSequenceFilter();  
   TimeSequenceFilter(EventData *event);
   virtual ~TimeSequenceFilter();
 

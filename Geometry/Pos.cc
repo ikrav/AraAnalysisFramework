@@ -119,7 +119,7 @@ double Pos::getTheta() const {
 }
 
 double Pos::getPhi() const { 
-  
+
   return atan2(_y-_origin_y,_x-_origin_x); 
   
 }

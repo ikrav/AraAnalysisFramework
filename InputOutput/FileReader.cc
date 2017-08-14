@@ -138,6 +138,7 @@ bool FileReader::setBranches(){
 }
 
 void FileReader::setupGeometry(){
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
     
   if(_station_number<0){
     
@@ -298,6 +299,7 @@ bool FileReader::loadEvent(int eventNumber){
     _isCalPulser = _raw_atri_ev->isCalpulserEvent();
     _isSoftwareTrig = _raw_atri_ev->isSoftwareTrigger();
     _isRFEvent = _raw_atri_ev->isRFTrigger();
+    _unixTime = _raw_atri_ev->unixTime;
 
     _l2_data = new L2Data(_real_atri_ev);
     //_l2_data->fillAtri(_real_atri_ev);
@@ -326,8 +328,6 @@ void FileReader::loadChannels(){
     
     TGraph *gVt0 = FFTtools::getInterpolatedGraph(gVt, _interpolation_factor);
     
-//     std::cout<<"ch= "<<ch<<" _real_icrr= "<<_real_icrr_ev<<" gVt= "<<gVt<<" gVt0= "<<gVt0<<std::endl;
-    
     _channels.push_back(new Channel(ch, gVt0));
     
     delete gVt;
@@ -338,6 +338,8 @@ void FileReader::loadChannels(){
 }
 
 bool FileReader::loadVRMS(){
+
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
 
   ifstream VRMSfile;
   VRMSfile.open(_vrms_file.c_str());
@@ -375,8 +377,8 @@ bool FileReader::loadVRMS(){
 
 void FileReader::scanSoftwareTriggersForVRMS() {
 
-  _VRMS.clear();
-  
+  if(_branches_set==0) setBranches(); 
+
   int cnt = 0;
   std::vector<double> rms;
   for(int ch = 0; ch < _num_chans; ch++) rms.push_back(0.0);
@@ -403,11 +405,31 @@ void FileReader::scanSoftwareTriggersForVRMS() {
     }
     
   }
+
+  std::vector<AntPos> positions;
+  
+  //use all antennas for reference frame
   
   for(int ch = 0; ch < _num_chans; ch++){
     rms[ch] /= cnt;
-    _VRMS.push_back(rms[ch]);
+    _VRMS[ch] = rms[ch];
+    double *locationXYZ = _station_info->getAntennaInfo(ch)->getLocationXYZ();
+    positions.push_back(AntPos(locationXYZ[0], locationXYZ[1], locationXYZ[2], _station_info->getAntennaInfo(ch)->polType, _VRMS[ch]));
   }
+
+  _geom->setChannels(positions);
+
+}
+
+void FileReader::setChannelVRMS(int channel, double rms) {
+
+  std::vector<AntPos> positions;
+  for(int ch = 0; ch < _num_chans; ch++){
+    double trms = _geom->getPosition(ch).getVRMS();
+    if(ch==channel) trms = rms;
+    positions.push_back(AntPos(_geom->getPosition(ch).getX(), _geom->getPosition(ch).getY(), _geom->getPosition(ch).getZ(), _geom->getPosition(ch).getPolarization(), trms));
+  }
+  _geom->setChannels(positions);
 
 }
 
@@ -497,12 +519,26 @@ bool FileReader::isIcrrEvent(){
 }
 
 bool FileReader::isCalPulser(){
-  
-  std::cerr<<__PRETTY_FUNCTION__<<" ERROR: this isn't implemented yet!"<<std::endl;
-  
-  return false;
-  
+    
   if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isCalPulser;
+
+}
+
+bool FileReader::isRFTrigger(){
+    
+  if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isRFEvent;
+
+}
+
+bool FileReader::isSoftwareTrigger(){
+    
+  if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isSoftwareTrig;
 
 }
 

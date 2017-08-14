@@ -71,6 +71,8 @@ public:
   double getParameter1() const;
   double getParameter2() const;
   double getParameter3() const;
+
+  inline int getStatus() {return _status;}
   
   int getVariant() const;
    

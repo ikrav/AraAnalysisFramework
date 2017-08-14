@@ -273,7 +273,7 @@ void L2Data::fillAtriEventData(UsefulAtriStationEvent *event){
        _header.errorFlag
        _header.RunNumber
   **/
-
+  
   TH1::AddDirectory(kFALSE);
   TH1D * histFFTPower = new TH1D("histFFTPower", "histFFTPower", N_POWER_BINS, FREQ_POWER_MIN - ((FREQ_POWER_MAX - FREQ_POWER_MIN)/N_POWER_BINS/2.), FREQ_POWER_MAX + ((FREQ_POWER_MAX - FREQ_POWER_MIN)/N_POWER_BINS/2.));
 

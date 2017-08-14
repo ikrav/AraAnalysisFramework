@@ -59,4 +59,5 @@ void AntPos::setChanID(int id){
 void AntPos::setVRMS(double value){
 
   _vrms = value;
+  //std::cout << __PRETTY_FUNCTION__; printf(": %.6f \t %.6f \t (%.3f,%.3f,%.3f) \n",value,_vrms,getX(),getY(),getZ());
 }

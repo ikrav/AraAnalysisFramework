@@ -1,6 +1,9 @@
 #include "AnalyticVertexFinder.h"
 
 ClassImp(AnalyticVertexFinder);
+
+int AnalyticVertexFinder::debug_bit=0;
+
 AnalyticVertexFinder::AnalyticVertexFinder() : VertexFinder() {}
 
 AnalyticVertexFinder::AnalyticVertexFinder(ChannelCollection channels, VertexPos *initial_position, int coordinate_system, int time_input, int lock_parameter, OpticalIce *ice_ptr, double par1, double par2, double par3) : VertexFinder(channels, initial_position, coordinate_system, time_input, lock_parameter, ice_ptr, par1, par2, par3){
@@ -150,46 +153,44 @@ void AnalyticVertexFinder::findVertex(){
 	for(int ant4=ant3+1; ant4 <_channels.getNumChans(); ant4++){
 	  if(_channels[ant4]->getWeight() == 0) continue;
 	  
-
-	    posV.clear();
-	    std::vector<double>().swap(posV);
-	    posV = _channels[ant1]->getPosition().getCartesian();
-	    setAnt(posV[0], posV[1], posV[2], _channels[ant1]->getTime());
-		   
-	    posV.clear();
-	    std::vector<double>().swap(posV);
-	    posV = _channels[ant2]->getPosition().getCartesian();
-	    setAnt(posV[0], posV[1], posV[2], _channels[ant2]->getTime());
-	    
-	    posV.clear();
-	    std::vector<double>().swap(posV);
-	    posV = _channels[ant3]->getPosition().getCartesian();
-	    setAnt(posV[0], posV[1], posV[2], _channels[ant3]->getTime());
-	    
-	    posV.clear();
-	    std::vector<double>().swap(posV);
-	    posV = _channels[ant4]->getPosition().getCartesian();
-	    setAnt(posV[0], posV[1], posV[2], _channels[ant4]->getTime());
-	    
-	    //solve
-	    bool status = solve();
-	    if(status){
-	      answerX +=_x;
-	      answerY +=_y;
-	      answerZ +=_z;
-	      count++;
-	    }
+	  posV.clear();
+	  std::vector<double>().swap(posV);
+	  posV = _channels[ant1]->getPosition().getCartesian();
+	  setAnt(posV[0], posV[1], posV[2], _channels[ant1]->getTime());
+	  
+	  posV.clear();
+	  std::vector<double>().swap(posV);
+	  posV = _channels[ant2]->getPosition().getCartesian();
+	  setAnt(posV[0], posV[1], posV[2], _channels[ant2]->getTime());
+	  
+	  posV.clear();
+	  std::vector<double>().swap(posV);
+	  posV = _channels[ant3]->getPosition().getCartesian();
+	  setAnt(posV[0], posV[1], posV[2], _channels[ant3]->getTime());
+	  
+	  posV.clear();
+	  std::vector<double>().swap(posV);
+	  posV = _channels[ant4]->getPosition().getCartesian();
+	  setAnt(posV[0], posV[1], posV[2], _channels[ant4]->getTime());
+	  
+	  //solve
+	  bool status = solve();
+	  if(status){
+	    answerX +=_x;
+	    answerY +=_y;
+	    answerZ +=_z;
+	    count++;
+	  }
 	}//ant4
       }//ant3
     }//ant2
   }//ant1
   
-  
   answerX /= count;
   answerY /= count;
   answerZ /= count;
   if(count > 0){
-    printf("ASM X: %f \t Y: %f \t Z: %f \n", answerX, answerY, answerZ);
+    if(debug_bit) printf("ASM X: %f \t Y: %f \t Z: %f \n", answerX, answerY, answerZ);
     setCartesian(answerX, answerY, answerZ);
     Pos position = Pos(answerX, answerY, answerZ);
     double t0 = getInteractionTime(position);
@@ -246,7 +247,6 @@ bool AnalyticVertexFinder::solve() {
   _indx_refraction1 = (C()/(1e9))/_ice->getIndex((z1+z2)/2);
   _indx_refraction2 = (C()/(1e9))/_ice->getIndex((z1+z3)/2);
   _indx_refraction3 = (C()/(1e9))/_ice->getIndex((z1+z4)/2);
-  
   double deltaD12, deltaD13, deltaD14;
   deltaD12 = (_ant_info[order[1]][3] - _ant_info[order[0]][3])*_indx_refraction1;
   deltaD13 = (_ant_info[order[2]][3] - _ant_info[order[0]][3])*_indx_refraction2;
@@ -287,7 +287,6 @@ bool AnalyticVertexFinder::solve() {
   // Solve for d with quadratic equation                                                           
   double timepos, timeneg;
   quad(QuadTerms,LinTerms,Cons,timepos,timeneg);
-  
   // Positive solution is taken                                                                    
   if(timepos>0 && timeneg<0) {
     _x = -(beta2*timepos + beta1)/beta3;
