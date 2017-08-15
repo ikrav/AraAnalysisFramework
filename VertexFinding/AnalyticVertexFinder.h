@@ -35,6 +35,8 @@ class AnalyticVertexFinder : public VertexFinder {
   virtual void findVertex(ChannelCollection channels, VertexPos *initial_pos);
   virtual void findVertex();
 
+  static int debug_bit;
+
  protected:
   //  virtual void calculateConfidence(double quality_parameter);
 

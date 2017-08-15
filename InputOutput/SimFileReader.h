@@ -46,6 +46,16 @@ public:
   virtual bool isCalPulser() const;
   virtual bool isSimulation() const;
   virtual Pos getRealPosition();
+  inline int getCurrentType() { return _current; }
+  inline int getNeutrinoFlavor() { return _flavor; }
+  inline int getNeutrinoOrAntiNeutrino() { return _nu_nubar; }
+  inline double getEventWeight() { return _weight; }
+  inline double getEventCrossSection() { return _cross_sec; }
+  inline double getEventEnergyExponent() { return _exponent; }
+  inline double getCylinderRadius() { return _cylinder_radius; }
+  int getNumberEventsAraTree2();
+  double getReceivingAngle(int channel, int solution);
+  int getReceivingAngleVectorSize(int channel);
   virtual Pos getSourcePosition();
   virtual SimData *getSimData();
   
@@ -66,6 +76,17 @@ private:
   
   Pos _real_pos;
 
+  int _station_ID;
+  int _a2cnt;
+  int _nu_nubar;
+  int _current;
+  int _flavor;
+  double _cross_sec;
+  double _weight;
+  double _exponent;
+  double _cylinder_radius;
+
+  std::vector<int> _evtTreeToAraTree2Translation;
   
 };
 

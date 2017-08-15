@@ -32,15 +32,13 @@ void FileReader::initialize(){
   _raw_atri_ev=0;
   _real_atri_ev=0;  
   _real_icrr_ev=0;
-  
-  clearEvent();
-  
+    
   // initialize other parameters
   _num_chans=0;
   
   _total_events=0;
   _current_event_num=0;
-  _interpolation_factor=1;
+  _interpolation_factor=1.0;
   _station_number=-1;
   
   _is_atri=0;
@@ -51,7 +49,10 @@ void FileReader::initialize(){
 
   _station_info=0;
   _geom=0;
-  
+  _l2_data=0;
+
+  clearEvent();
+
 }
 
 bool FileReader::setChains(){
@@ -105,7 +106,7 @@ bool FileReader::setBranches(){
   if(_station_number==0){
     
     if(_chain->SetBranchAddress("event", &_raw_icrr_ev)!=TTree::kMatch){
-    
+      
       std::cerr<<__PRETTY_FUNCTION__<<" ERROR: cannot locate branch 'event' in chain"<<std::endl;
       return false;
     
@@ -126,10 +127,7 @@ bool FileReader::setBranches(){
       return false;
     
     }
-      
-    _is_icrr = 1;
-    _is_atri = 0;
-    
+          
   }
  
   setDefaultInterpolationFactor();
@@ -140,6 +138,7 @@ bool FileReader::setBranches(){
 }
 
 void FileReader::setupGeometry(){
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
     
   if(_station_number<0){
     
@@ -215,12 +214,13 @@ void FileReader::clearEvent(){
   
   clearChannels();
     
-//   if(_raw_ev){ delete _raw_ev; _raw_ev=0; }
-//   if(_raw_icrr_ev){ delete _raw_icrr_ev; _raw_icrr_ev=0; }
-//   if(_raw_atri_ev){ delete _raw_atri_ev; _raw_atri_ev=0; }
+//  if(_raw_ev){ delete _raw_ev; _raw_ev=0; }
+//  if(_raw_icrr_ev){ delete _raw_icrr_ev; _raw_icrr_ev=0; }
+//  if(_raw_atri_ev){ delete _raw_atri_ev; _raw_atri_ev=0; }
   
   if(_real_icrr_ev){ delete _real_icrr_ev; _real_icrr_ev=0; }
   if(_real_atri_ev){ delete _real_atri_ev; _real_atri_ev=0; }
+  if(_l2_data){ delete _l2_data; _l2_data=0; }
   
 }
 
@@ -254,7 +254,6 @@ bool FileReader::loadNextEvent(){
 
   if(_current_event_num >= _total_events) return false;
   else{
-    
     if(loadEvent(_current_event_num)) _current_event_num++;
     else return false; // if we fail to load event! 
     
@@ -284,22 +283,31 @@ bool FileReader::loadEvent(int eventNumber){
   int isPulser=0; // we need to find something smart to do with this result... 
   
   if(_is_icrr){
-    
+
     _real_icrr_ev = new UsefulIcrrStationEvent(_raw_icrr_ev, AraCalType::kLatestCalib);
     
-    isPulser = _real_icrr_ev->isCalPulserEvent();
+    _isCalPulser = _real_icrr_ev->isCalPulserEvent();
     
+    _l2_data = new L2Data(_real_icrr_ev);
+    //_l2_data->fillIcrr(_real_icrr_ev);
     
   }
   else if(_is_atri){
-    
+
     _real_atri_ev = new UsefulAtriStationEvent(_raw_atri_ev, AraCalType::kLatestCalib);
-    // how do we know it is calpulser?!
     
+    _isCalPulser = _raw_atri_ev->isCalpulserEvent();
+    _isSoftwareTrig = _raw_atri_ev->isSoftwareTrigger();
+    _isRFEvent = _raw_atri_ev->isRFTrigger();
+    _unixTime = _raw_atri_ev->unixTime;
+
+    _l2_data = new L2Data(_real_atri_ev);
+    //_l2_data->fillAtri(_real_atri_ev);
+
   }
   
   loadChannels();
-   
+  
   return true;
 
 }
@@ -320,8 +328,6 @@ void FileReader::loadChannels(){
     
     TGraph *gVt0 = FFTtools::getInterpolatedGraph(gVt, _interpolation_factor);
     
-//     std::cout<<"ch= "<<ch<<" _real_icrr= "<<_real_icrr_ev<<" gVt= "<<gVt<<" gVt0= "<<gVt0<<std::endl;
-    
     _channels.push_back(new Channel(ch, gVt0));
     
     delete gVt;
@@ -332,6 +338,8 @@ void FileReader::loadChannels(){
 }
 
 bool FileReader::loadVRMS(){
+
+  std::cout << __PRETTY_FUNCTION__ << std::endl;
 
   ifstream VRMSfile;
   VRMSfile.open(_vrms_file.c_str());
@@ -365,6 +373,64 @@ bool FileReader::loadVRMS(){
   
   return true;
   
+}
+
+void FileReader::scanSoftwareTriggersForVRMS() {
+
+  if(_branches_set==0) setBranches(); 
+
+  int cnt = 0;
+  std::vector<double> rms;
+  for(int ch = 0; ch < _num_chans; ch++) rms.push_back(0.0);
+
+  for(int ievt=0; ievt<_total_events; ievt++) {
+
+    if(loadEvent(ievt)) {
+      if(_is_icrr && !_isCalPulser) {
+	for(int ch = 0; ch < _num_chans; ch++){
+	  TGraph *gra = _real_icrr_ev->getGraphFromRFChan(ch);
+	  rms[ch] += gra->GetRMS(2);
+	  delete gra;
+	}    
+	cnt++;
+      }
+      if(_is_atri && _isSoftwareTrig) {
+	for(int ch = 0; ch < _num_chans; ch++){
+	  TGraph *gra = _real_atri_ev->getGraphFromRFChan(ch);
+	  rms[ch] += gra->GetRMS(2);
+	  delete gra;
+	}
+	cnt++;
+      }
+    }
+    
+  }
+
+  std::vector<AntPos> positions;
+  
+  //use all antennas for reference frame
+  
+  for(int ch = 0; ch < _num_chans; ch++){
+    rms[ch] /= cnt;
+    _VRMS[ch] = rms[ch];
+    double *locationXYZ = _station_info->getAntennaInfo(ch)->getLocationXYZ();
+    positions.push_back(AntPos(locationXYZ[0], locationXYZ[1], locationXYZ[2], _station_info->getAntennaInfo(ch)->polType, _VRMS[ch]));
+  }
+
+  _geom->setChannels(positions);
+
+}
+
+void FileReader::setChannelVRMS(int channel, double rms) {
+
+  std::vector<AntPos> positions;
+  for(int ch = 0; ch < _num_chans; ch++){
+    double trms = _geom->getPosition(ch).getVRMS();
+    if(ch==channel) trms = rms;
+    positions.push_back(AntPos(_geom->getPosition(ch).getX(), _geom->getPosition(ch).getY(), _geom->getPosition(ch).getZ(), _geom->getPosition(ch).getPolarization(), trms));
+  }
+  _geom->setChannels(positions);
+
 }
 
 // getters
@@ -430,6 +496,12 @@ int FileReader::getStationId(){
   
 }
 
+L2Data *FileReader::getL2Data() {
+
+  return _l2_data;
+
+}
+
 bool FileReader::isAtriEvent(){
     
   if(_branches_set==0) setBranches(); // lazy load the branches
@@ -447,12 +519,26 @@ bool FileReader::isIcrrEvent(){
 }
 
 bool FileReader::isCalPulser(){
-  
-  std::cerr<<__PRETTY_FUNCTION__<<" ERROR: this isn't implemented yet!"<<std::endl;
-  
-  return false;
-  
+    
   if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isCalPulser;
+
+}
+
+bool FileReader::isRFTrigger(){
+    
+  if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isRFEvent;
+
+}
+
+bool FileReader::isSoftwareTrigger(){
+    
+  if(_branches_set==0) setBranches(); // lazy load the branches
+
+  return _isSoftwareTrig;
 
 }
 

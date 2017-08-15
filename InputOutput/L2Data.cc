@@ -273,18 +273,20 @@ void L2Data::fillAtriEventData(UsefulAtriStationEvent *event){
        _header.errorFlag
        _header.RunNumber
   **/
-
+  
   TH1::AddDirectory(kFALSE);
   TH1D * histFFTPower = new TH1D("histFFTPower", "histFFTPower", N_POWER_BINS, FREQ_POWER_MIN - ((FREQ_POWER_MAX - FREQ_POWER_MIN)/N_POWER_BINS/2.), FREQ_POWER_MAX + ((FREQ_POWER_MAX - FREQ_POWER_MIN)/N_POWER_BINS/2.));
 
   TH1D *histFFTPowerLow = new TH1D("histFFTPowerLow", "histFFTPowerLow", N_POWER_BINS_L, FREQ_POWER_MIN_L - ((FREQ_POWER_MAX_L - FREQ_POWER_MIN_L)/N_POWER_BINS_L/2.), FREQ_POWER_MAX_L + ((FREQ_POWER_MAX_L - FREQ_POWER_MIN_L)/N_POWER_BINS_L/2.));
 
   for(int ch=0; ch<16; ch++){
-
+    
     TGraph *gWf = event->getGraphFromRFChan(ch);
-    double totPower = fillFFTHistoForRFChanL2(ch, histFFTPower, event->getFFTForRFChan(ch));
-    double totPowerLow = fillFFTHistoForRFChanL2(ch, histFFTPowerLow, event->getFFTForRFChan(ch));
-
+    TGraph *fftpowergraph =  event->getFFTForRFChan(ch);
+    double totPower = fillFFTHistoForRFChanL2(ch, histFFTPower, fftpowergraph);
+    double totPowerLow = fillFFTHistoForRFChanL2(ch, histFFTPowerLow, fftpowergraph);
+    delete fftpowergraph;
+    
     _wf.power[ch] = totPower;
     _wf.freqMax[ch] = histFFTPower->GetBinCenter(histFFTPower->GetMaximumBin());
 
@@ -302,10 +304,10 @@ void L2Data::fillAtriEventData(UsefulAtriStationEvent *event){
     else
       gVt0 = gWf;
 
-
+    
     _wf.v2[ch] = FFTtools::integrateVoltageSquared(gWf, -1, -1);
 
-
+    
     _wf.maxV[ch] = 0;
     double *wfV = gWf->GetY();
 
@@ -320,10 +322,10 @@ void L2Data::fillAtriEventData(UsefulAtriStationEvent *event){
 
       //      _wf.isInTrigPattern[ch] = event->trig.isInTrigPattern(ch);  // MISSING FOR ATRI 
     }
-
+    
     delete gVt0;
     delete gWf;
-
+    
   }
 
   delete histFFTPowerLow;
@@ -352,10 +354,10 @@ double L2Data::fillFFTHistoForRFChanL2(int chan, TH1D *histFFT, TGraph *grRF){
     tot = tot+pow(10,(yVals[i]/10.));
     histFFT->SetBinContent(bin, newVal);
   }
-
+  
   tot = 10.*log10(tot);
   delete grFFT;
-
+	         
   return tot;
 }
 

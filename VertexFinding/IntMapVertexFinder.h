@@ -31,6 +31,11 @@ public:
   TH2D *getMap(int index=0) const;
   TH2D *getBestMap() const;
   
+  inline double getBestCorrelation() {return _best_corr;}
+  inline double getLogStep() {return _step_log;}
+  inline double getPhiStep() {return _step_phi;}
+  inline double getThetaStep() {return _step_theta;}
+
   virtual void findVertex();
   
   virtual std::string getFinderName() const;
@@ -63,6 +68,10 @@ protected:
   int _best_bin_theta;
   int _best_bin_phi;
   double _best_corr;
+
+  double _step_theta;
+  double _step_phi;
+  double _step_log;
   
   std::vector<double> _R_axis;
   std::vector<double> _theta_axis;

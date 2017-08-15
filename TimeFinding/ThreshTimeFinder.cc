@@ -40,7 +40,7 @@ void ThreshTimeFinder::initialize(){
  
 //   std::cout<<"ThreshTimeFinder::initialize()"<<std::endl;
   
-  double multiplier=6;
+  double multiplier=4.5;
     
   _quality_parameter=0;
   
@@ -59,7 +59,7 @@ void ThreshTimeFinder::initialize(){
   //  useMeasuredThreshold();// this checks if there is a specific (experimentally measured) threshold to replace _thresh. 
   
   _thresh*=multiplier;
-  
+
   _signal_width=0;
   
   setFinderName("thresh");
@@ -101,7 +101,6 @@ void ThreshTimeFinder::calculateTime(){
   if(bin_start>0){// if there is a signal above the threshold...
     
     setTime(x[bin_start]);
-
     _quality_parameter=maximum;
   
     _signal_width=x[bin_end]-x[bin_start];

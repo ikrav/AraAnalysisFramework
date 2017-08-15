@@ -9,7 +9,7 @@
 #include "Channel.h"
 #include "ChannelCollection.h"
 #include "FFTtools.h"
-//#include "L2Data.h"
+#include "L2Data.h"
 
 /**
    FileReader class \fn
@@ -43,6 +43,8 @@ public:
   virtual bool loadEvent(int event_number);
   void loadChannels();
   bool loadVRMS();
+  void scanSoftwareTriggersForVRMS();
+  void setChannelVRMS(int channel, double rms);
     
   // getters
   std::string getFileNames() const;
@@ -54,10 +56,14 @@ public:
   int getAraCurrentEventNumber();
   int getRunNumber();
   int getStationId();
+  inline double getUnixtime() { return _unixTime; }
+  L2Data *getL2Data();
   
   bool isIcrrEvent();
   bool isAtriEvent();
   virtual bool isCalPulser();
+  virtual bool isSoftwareTrigger();
+  virtual bool isRFTrigger();
   virtual bool isSimulation() const;
   
   double getInterpolationFactor() const;
@@ -87,6 +93,12 @@ protected:
   int _is_icrr;
   int _use_surface_ants;
 
+  bool _isCalPulser;
+  bool _isRFEvent;
+  bool _isSoftwareTrig;
+
+  double _unixTime;
+
   int _branches_set;
   
   std::string _file_names;
@@ -105,7 +117,7 @@ protected:
   AraStationInfo *_station_info;
   StationGeometry *_geom;
   ChannelCollection _channels;
-  //L2Data *_l2_data;
+  L2Data *_l2_data;
     
   ClassDef(FileReader, 1);
   

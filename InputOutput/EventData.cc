@@ -96,6 +96,19 @@ void EventData::printout(){
   
 }
 
+void EventData::fill(FileReader *reader) {
+
+  setChannelCollection(reader->getChannelCollection());
+  setHousekeeping(reader->getL2Data());  
+
+}
+
+void EventData::fill(SimFileReader *reader) {
+
+  setChannelCollection(reader->getChannelCollection());
+
+}
+
 // getters
 int EventData::getCombineMethod() const {
   

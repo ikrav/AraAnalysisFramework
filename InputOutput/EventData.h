@@ -7,7 +7,8 @@
 #include "VertexPos.h"
 #include "L2Data.h"
 #include "SimData.h"
-
+#include "FileReader.h"
+#include "SimFileReader.h"
 
 class EventData {
   
@@ -26,6 +27,9 @@ public:
   
   void initialize();
   void printout();
+
+  void fill(FileReader *reader);
+  void fill(SimFileReader *reader);
 
   // get methods
   int getCombineMethod() const;

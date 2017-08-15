@@ -121,14 +121,14 @@ void IntMapVertexFinder::reset(){
   _theta_axis.reserve(_num_bins_theta);
   double max_theta=_initial_position->getUpperBoundTheta();
   double min_theta=_initial_position->getLowerBoundTheta();  
-  double step_theta=(max_theta-min_theta)/_num_bins_theta;
-  for(int i=0;i<_num_bins_theta;i++) _theta_axis.push_back(min_theta+i*step_theta);
+  _step_theta=(max_theta-min_theta)/_num_bins_theta;
+  for(int i=0;i<_num_bins_theta;i++) {_theta_axis.push_back(min_theta+i*_step_theta); if(debug_bit) printf("THETA %i: %.6f \n",min_theta+i*_step_theta);}
   
   _phi_axis.reserve(_num_bins_phi);
   double max_phi=_initial_position->getUpperBoundPhi();
   double min_phi=_initial_position->getLowerBoundPhi();  
-  double step_phi=(max_phi-min_phi)/_num_bins_phi;
-  for(int i=0;i<_num_bins_phi;i++) _phi_axis.push_back(min_phi+i*step_phi);
+  _step_phi=(max_phi-min_phi)/_num_bins_phi;
+  for(int i=0;i<_num_bins_phi;i++) {_phi_axis.push_back(min_phi+i*_step_phi); if(debug_bit) printf("PHI %i: %.6f \n",min_phi+i*_step_phi);}
   
   VertexFinder::reset();
   
@@ -225,6 +225,9 @@ void IntMapVertexFinder::makeLogAxis(){
     _R_axis.push_back(min_R);
     _R_axis.push_back(current_R);
     _R_axis.push_back(_initial_position->getUpperBoundR());
+    if(debug_bit) printf("R 0: %.6f \n",min_R);
+    if(debug_bit) printf("R 1: %.6f \n",current_R);
+    if(debug_bit) printf("R 2: %.6f \n",_initial_position->getUpperBoundR());
     return;
     
   }
@@ -236,19 +239,23 @@ void IntMapVertexFinder::makeLogAxis(){
   int numUpper=_num_bins_R/2-1; // don't count the current R for both
   
   lower_axis.reserve(numLower);
-  double min_R_log=std::log(min_R);
-  double max_R_log=std::log(current_R);
-  double step_log=(max_R_log-min_R_log)/(numLower);
-  for(int i=0;i<=numLower;i++) lower_axis.push_back(std::exp(min_R_log+i*step_log));
-  
+  //double min_R_log=std::log(min_R);
+  //double max_R_log=std::log(current_R);
+  double min_R_log=std::log(_initial_position->getLowerBoundR());
+  double max_R_log=std::log(_initial_position->getUpperBoundR());
+  _step_log=(max_R_log-min_R_log)/(numLower);
+  //for(int i=0;i<=numLower;i++) { lower_axis.push_back(std::exp(min_R_log+i*step_log)); printf("R %i: %.6f \n",i,std::exp(min_R_log+i*step_log)); }
+  _step_log=(max_R_log-min_R_log)/(_num_bins_R-1);
+  for(int i=0;i<_num_bins_R;i++) { lower_axis.push_back(std::exp(min_R_log+i*_step_log)); if(debug_bit) printf("R %i: %.6f \n",i,std::exp(min_R_log+i*_step_log)); }
+  /*
   upper_axis.reserve(numUpper);
   min_R_log=std::log(current_R);
   max_R_log=std::log(max_R);
-  step_log=(max_R_log-min_R_log)/(numUpper);
-  for(int i=1;i<=numUpper;i++) upper_axis.push_back(std::exp(min_R_log+i*step_log));
-  
+  _step_log=(max_R_log-min_R_log)/(numUpper);
+  for(int i=1;i<=numUpper;i++) { upper_axis.push_back(std::exp(min_R_log+i*_step_log)); printf("R %i: %.6f \n",i+numLower,std::exp(min_R_log+i*_step_log)); }
+  */
   _R_axis=lower_axis;
-  _R_axis.insert(_R_axis.end(), upper_axis.begin(), upper_axis.end());
+  //_R_axis.insert(_R_axis.end(), upper_axis.begin(), upper_axis.end());
   
 }
 
@@ -304,7 +311,8 @@ void IntMapVertexFinder::findVertex(){
     
   }// for i
   
-  
+
+  if(debug_bit) printf("INT RESULT: R: %.6f \t T: %.6f \t P: %.6f \n",_R_axis[_best_bin_R], _theta_axis[_best_bin_theta], _phi_axis[_best_bin_phi]);
   calculateConfidence(_best_corr);
   setSpherical(_R_axis[_best_bin_R], _theta_axis[_best_bin_theta], _phi_axis[_best_bin_phi]);
   // still need to take care of errors...

@@ -56,12 +56,11 @@ void OpticalIce::printout(){
 // getter methods
 double OpticalIce::getIndex(double z){
  
-  if(z >= 0 ) return 1;  // above surface
-  if(_variable_ice_bit==0 || fabs(z)>_depth_of_firn) return _deep_ice_index; // constant ice case
+  if(z >= 0) return 1;  // above surface
+  if(_variable_ice_bit==0) return _deep_ice_index; // constant ice case
   double result = _deep_ice_index + (_firn_ice_index - _deep_ice_index)*std::exp(-_exp_slope*fabs(z));
-  //  std::cout << _deep_ice_index << _firn_ice_index - _deep_ice_index << "* " <<"exp(" <<-_exp_slope << "* "<< fabs(z) << " ) = " << result << std::endl;
-
   return result;
+
 }
 
 double OpticalIce::getAttenuation(double z, double path_length){

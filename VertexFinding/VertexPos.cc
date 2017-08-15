@@ -156,6 +156,14 @@ void VertexPos::initialize(){
   double r_error=2500;
   double theta_error=90*DEGTORAD;
   double phi_error=180*DEGTORAD;
+
+  _upper_bound_theta = 180*DEGTORAD;
+  _upper_bound_R = 2500;
+  _upper_bound_phi = 360*DEGTORAD;
+
+  _lower_bound_theta = 0.0;
+  _lower_bound_R = 10.0;
+  _lower_bound_phi = 0.0;
   
   _covMatSpherical.clear();
   _covMatCartesian.clear();
@@ -697,31 +705,35 @@ std::vector<double> VertexPos::getErrorsSpherical(double expand) const {
     
 double VertexPos::getLowerBoundR(double expand) const {
   
-  double low_r=getR() - getErrorR(expand);
+  //double low_r=getR() - getErrorR(expand);
+  //if(low_r<10) low_r=10; // minimal R bound...
+  //return low_r;
   
-  if(low_r<10) low_r=10; // minimal R bound...
-  
-  return low_r;
-  
+  return _lower_bound_R;
+
 }
 
 double VertexPos::getLowerBoundTheta(double expand) const {
   
-  double low_theta=getTheta() - getErrorTheta(expand);
+  //double low_theta=getTheta() - getErrorTheta(expand);
   
   // add checks here...
   
-  return low_theta;
+  //return low_theta;
+
+  return _lower_bound_theta;
   
 }
 
 double VertexPos::getLowerBoundPhi(double expand) const {
   
-  double low_phi=getPhi() - getErrorPhi(expand);
+  //double low_phi=getPhi() - getErrorPhi(expand);
   
   // add checks here...
   
-  return low_phi;
+  //return low_phi;
+
+  return _lower_bound_phi;
   
 }
 
@@ -767,31 +779,37 @@ std::vector<double> VertexPos::getLowerBoundsSpherical(double expand) const{
     
 double VertexPos::getUpperBoundR(double expand) const {
       
-  double high_r=getR() + getErrorR(expand);
+  //double high_r=getR() + getErrorR(expand);
   
   // add checks here...
   
-  return high_r;
+  //return high_r;
+
+  return _upper_bound_R;
   
 }
 
 double VertexPos::getUpperBoundTheta(double expand) const {
     
-  double high_theta=getTheta() + getErrorTheta(expand);
+  //double high_theta=getTheta() + getErrorTheta(expand);
   
   // add checks here...
   
-  return high_theta;
-  
+  //return high_theta;
+
+  return _upper_bound_theta;
+
 }
 
 double VertexPos::getUpperBoundPhi(double expand) const {
   
-  double high_phi=getPhi() + getErrorPhi(expand);
+  //double high_phi=getPhi() + getErrorPhi(expand);
   
   // add checks here...
   
-  return high_phi;
+  //return high_phi;
+
+  return _upper_bound_phi;
   
 }
 
@@ -1463,7 +1481,7 @@ void VertexPos::setErrorInSphericalMatrix(double e_R, double e_Theta, double e_P
   
 void VertexPos::calculateSpherical(){
  
-  std::cerr<<__PRETTY_FUNCTION__<<" ERROR: this is not yet implemented..."<<std::endl;
+  //std::cerr<<__PRETTY_FUNCTION__<<" ERROR: this is not yet implemented..."<<std::endl;
   
 }
 
@@ -1634,26 +1652,32 @@ void VertexPos::setErrorsSpherical(double e_R, double e_theta, double e_phi, int
 
 void VertexPos::setLowerBoundR(double e_R, int calculate){
   
-  if(e_R>getR()){ std::cerr<<"ERROR: setLowerBoundR("<<e_R<<") larger than getR()= "<<getR()<<"\n"; return; }
+  //if(e_R>getR()){ std::cerr<<"ERROR: setLowerBoundR("<<e_R<<") larger than getR()= "<<getR()<<"\n"; return; }
   
-  setErrorR(getR() - e_R, calculate);
+  //setErrorR(getR() - e_R, calculate);
   
+  _lower_bound_R = e_R;
+
 }
   
 void VertexPos::setLowerBoundTheta(double e_theta, int calculate){
     
-  if(e_theta>getTheta()){ std::cerr<<"ERROR: setLowerBoundTheta("<<e_theta<<") larger than getTheta()= "<<getTheta()<<"\n"; return; }
+  //if(e_theta>getTheta()){ std::cerr<<"ERROR: setLowerBoundTheta("<<e_theta<<") larger than getTheta()= "<<getTheta()<<"\n"; return; }
   
-  setErrorTheta(getTheta() - e_theta, calculate);
+  //setErrorTheta(getTheta() - e_theta, calculate);
   
+  _lower_bound_theta = e_theta;
+
 }
   
 void VertexPos::setLowerBoundPhi(double e_phi, int calculate){
     
-  if(e_phi>getPhi()){ std::cerr<<"ERROR: setLowerBoundPhi("<<e_phi<<") larger than getPhi()= "<<getPhi()<<"\n"; return; }
+  //if(e_phi>getPhi()){ std::cerr<<"ERROR: setLowerBoundPhi("<<e_phi<<") larger than getPhi()= "<<getPhi()<<"\n"; return; }
   
-  setErrorPhi(getPhi() - e_phi, calculate);
+  //setErrorPhi(getPhi() - e_phi, calculate);
   
+  _lower_bound_phi = e_phi;
+
 }
   
 void VertexPos::setLowerBoundsSpherical(std::vector<double> lower_bounds_spherical, int calculate){
@@ -1676,26 +1700,32 @@ void VertexPos::setLowerBoundsSpherical(double e_R, double e_theta, double e_phi
   
 void VertexPos::setUpperBoundR(double e_R, int calculate){
       
-  if(e_R<getR()){ std::cerr<<"ERROR: setUpperBoundR("<<e_R<<") smaller than getR()= "<<getR()<<"\n"; return; }
+  //if(e_R<getR()){ std::cerr<<"ERROR: setUpperBoundR("<<e_R<<") smaller than getR()= "<<getR()<<"\n"; return; }
   
-  setErrorTheta(e_R - getR(), calculate);
+  //setErrorTheta(e_R - getR(), calculate);
+
+  _upper_bound_R = e_R;
   
 }
   
 void VertexPos::setUpperBoundTheta(double e_theta, int calculate){
         
-  if(e_theta<getTheta()){ std::cerr<<"ERROR: setUpperBoundTheta("<<e_theta<<") smaller than getTheta()= "<<getTheta()<<"\n"; return; }
+  //if(e_theta<getTheta()){ std::cerr<<"ERROR: setUpperBoundTheta("<<e_theta<<") smaller than getTheta()= "<<getTheta()<<"\n"; return; }
   
-  setErrorTheta(e_theta - getTheta(), calculate);
+  //setErrorTheta(e_theta - getTheta(), calculate);
+
+  _upper_bound_theta = e_theta;
   
 }
 
 void VertexPos::setUpperBoundPhi(double e_phi, int calculate){
         
-  if(e_phi<getPhi()){ std::cerr<<"ERROR: setUpperBoundPhi("<<e_phi<<") smaller than getPhi()= "<<getPhi()<<"\n"; return; }
+  //if(e_phi<getPhi()){ std::cerr<<"ERROR: setUpperBoundPhi("<<e_phi<<") smaller than getPhi()= "<<getPhi()<<"\n"; return; }
   
-  setErrorPhi(e_phi - getPhi(), calculate);
+  //setErrorPhi(e_phi - getPhi(), calculate);
   
+  _upper_bound_phi = e_phi;
+
 }
 
 void VertexPos::setUpperBoundsSpherical(std::vector<double> upper_bounds_spherical, int calculate){
