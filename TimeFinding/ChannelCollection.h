@@ -45,7 +45,7 @@ public:
   Channel *getBestChannel() const;
   
   Channel *getEarliestChannel() const;
-  
+
   Channel *operator[](int index) const;
   
   ChannelCollection getVpolChannelCollection() const;
@@ -62,7 +62,7 @@ public:
   void reserve(int number);
   void push_back(Channel *channel);
   void setVector(std::vector<Channel*> channels);
-  
+
   // apply stuff
   //apply either time/ delta
   void applyTimeDeltaFinder(int finder_type, int delta=0, double par1=0, double par2=0);

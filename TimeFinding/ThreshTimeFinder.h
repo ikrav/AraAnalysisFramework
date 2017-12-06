@@ -23,6 +23,8 @@ public:
   
 protected:
     
+  double _threshold_multiplier;
+
   virtual void initialize();
   
   virtual void calculateTime();

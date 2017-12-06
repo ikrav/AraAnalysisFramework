@@ -70,7 +70,7 @@ ChannelCollection &ChannelCollection::assignDeepCopy(const ChannelCollection &ot
   
   if(other._csw) _csw=new TGraph(*other._csw);
   else _csw=0;
-    
+
   reserve(other.size());
   
   for(int ch=0;ch<other.size();ch++){// first, copy the channels (deep copy)

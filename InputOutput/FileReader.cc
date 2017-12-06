@@ -300,6 +300,7 @@ bool FileReader::loadEvent(int eventNumber){
     _isSoftwareTrig = _raw_atri_ev->isSoftwareTrigger();
     _isRFEvent = _raw_atri_ev->isRFTrigger();
     _unixTime = _raw_atri_ev->unixTime;
+    _tus = (_raw_atri_ev->timeStamp)*0.01;
 
     _l2_data = new L2Data(_real_atri_ev);
     //_l2_data->fillAtri(_real_atri_ev);
@@ -328,7 +329,7 @@ void FileReader::loadChannels(){
     
     TGraph *gVt0 = FFTtools::getInterpolatedGraph(gVt, _interpolation_factor);
     
-    _channels.push_back(new Channel(ch, gVt0));
+    _channels.push_back(new Channel(ch, gVt));
     
     delete gVt;
     delete gVt0;
