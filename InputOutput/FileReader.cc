@@ -329,7 +329,7 @@ void FileReader::loadChannels(){
     
     TGraph *gVt0 = FFTtools::getInterpolatedGraph(gVt, _interpolation_factor);
     
-    _channels.push_back(new Channel(ch, gVt));
+    _channels.push_back(new Channel(ch, gVt0));
     
     delete gVt;
     delete gVt0;
