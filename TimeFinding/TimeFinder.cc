@@ -28,7 +28,7 @@ TimeFinder::TimeFinder(const TimeFinder &other) : _channel_id(other.getChannelId
   _waveform=other.getWaveform();
   setScale(other.getScale());
   setThresh(other.getThresh());
-  
+
   setParameters(other.getPar1(), other.getPar2());
   
   
@@ -174,6 +174,7 @@ void TimeFinder::setThresh(double threshold){
   _thresh=threshold;
   
 }
+
 
 void TimeFinder::setWaveform(TGraph *waveform){
   

@@ -3,6 +3,7 @@
 
 #include "CppIncludes.h"
 #include "RootIncludes.h"
+#include "FFTtools.h"
 
 #include "Pos.h"
 #include "Timing.h"
@@ -48,6 +49,8 @@ public:
   int getChannelId() const;
   int getStationId() const;
   int isSimulated() const;
+
+  void getFFT(std::vector<double> &real, std::vector<double> &imag, double &freqStep);
   
   double getTimeOffsetFromRay() const;
     

@@ -198,6 +198,31 @@ int Channel::getStationId() const { return _station_id; }
 
 int Channel::isSimulated() const { return _is_simulated; }
 
+void Channel::getFFT(std::vector<double> &real, std::vector<double> &imag, double &freqStep) {
+
+  real.clear();
+  imag.clear();
+
+  int N=_waveform->GetN(); 
+  double oldY[N];
+  for(int i=0; i<N; i++) {
+    oldY[i] = _waveform->GetY()[i];
+  }
+  
+  freqStep=1/(((_waveform->GetX()[1]-_waveform->GetX()[0]))*N);
+  //printf("N: %i \t FreqStep = %.6f \t TimeStep: %.6f \n",N,freqStep,_waveform->GetX()[1]-_waveform->GetX()[0]);
+  //freqStep *= 1e3;
+  FFTWComplex *thefft=FFTtools::doFFT(N,oldY);
+
+  for(int i=0; i<(N/2+1); i++) {
+    real.push_back(thefft[i].re);
+    imag.push_back(thefft[i].im);
+  }
+
+  delete [] thefft;
+
+}
+
 double Channel::getTimeOffsetFromRay() const {
  
   if(_ray==0){ std::cerr<<"ERROR: no ray object has been initialized here...\n"; return 0; }

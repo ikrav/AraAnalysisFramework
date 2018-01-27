@@ -57,6 +57,7 @@ public:
   int getRunNumber();
   int getStationId();
   inline double getUnixtime() { return _unixTime; }
+  inline double getTimeStamp() { return _tus; }
   L2Data *getL2Data();
   
   bool isIcrrEvent();
@@ -98,6 +99,7 @@ protected:
   bool _isSoftwareTrig;
 
   double _unixTime;
+  double _tus;
 
   int _branches_set;
   

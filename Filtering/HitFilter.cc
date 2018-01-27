@@ -52,7 +52,7 @@ void HitFilter::getNeededMultiplierVector(vector<double> &neededV) {
   neededV.clear();
   int nChl = _data->getChannelCollection().getNumChans();
   for(int ichl=0; ichl<nChl; ichl++) {
-    TGraph *hgra = FFTtools::getHilbertEnvelope(_data->getChannelCollection().getChannel(ichl)->getWaveform());
+    //TGraph *hgra = FFTtools::getHilbertEnvelope(_data->getChannelCollection().getChannel(ichl)->getWaveform());
     double rms = _data->getChannelCollection().getChannel(ichl)->getGeometry()->getPosition(ichl).getVRMS();
     int npnt = _data->getChannelCollection().getChannel(ichl)->getWaveform()->GetN();
     double maxmult = 0.0;
@@ -61,7 +61,7 @@ void HitFilter::getNeededMultiplierVector(vector<double> &neededV) {
       double mult = val/rms;
       if(maxmult<mult) maxmult = mult;
     }
-    delete hgra;
+    //delete hgra;
     neededV.push_back(maxmult);
   }
 }

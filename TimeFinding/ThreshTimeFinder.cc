@@ -39,12 +39,13 @@ TimeFinder *ThreshTimeFinder::getDeepCopy(){
 void ThreshTimeFinder::initialize(){
  
 //   std::cout<<"ThreshTimeFinder::initialize()"<<std::endl;
-  
-  double multiplier=4.5;
-    
+      
   _quality_parameter=0;
   
   _waveform=0;
+
+  if(_parameter1==0) _threshold_multiplier = 4.5;
+  else _threshold_multiplier = _parameter1;
 
   if(_geom){
     _thresh = _geom->getPosition(_channel_id).getVRMS();
@@ -58,7 +59,7 @@ void ThreshTimeFinder::initialize(){
     
   //  useMeasuredThreshold();// this checks if there is a specific (experimentally measured) threshold to replace _thresh. 
   
-  _thresh*=multiplier;
+  _thresh*=_threshold_multiplier;
 
   _signal_width=0;
   

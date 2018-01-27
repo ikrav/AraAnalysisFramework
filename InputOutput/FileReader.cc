@@ -300,6 +300,7 @@ bool FileReader::loadEvent(int eventNumber){
     _isSoftwareTrig = _raw_atri_ev->isSoftwareTrigger();
     _isRFEvent = _raw_atri_ev->isRFTrigger();
     _unixTime = _raw_atri_ev->unixTime;
+    _tus = (_raw_atri_ev->timeStamp)*0.01;
 
     _l2_data = new L2Data(_real_atri_ev);
     //_l2_data->fillAtri(_real_atri_ev);
